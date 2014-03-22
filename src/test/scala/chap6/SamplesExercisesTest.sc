@@ -8,7 +8,9 @@ val (n1, rng2) = rng.nextInt
 
 
 
+
 val (n2, rng3) = rng2.nextInt
+
 
 
 
@@ -18,7 +20,11 @@ val (d, rng4) = RNG.double(rng3)
 
 
 
+
 val ((d1, d2, d3), rng5) = RNG.double3(rng4)
+
+
+
 
 
 
@@ -49,6 +55,7 @@ val randDoubleInt: Rand[(Double, Int)] = RNG.both(RNG.double, int)
 RNG.sequence(List(RNG.unit(1), RNG.unit(2), RNG.unit(3)))(listR._2)._1
 
 val (i, rng6) = RNG.positiveLessThan(6)(rng5)
+
 
 
 

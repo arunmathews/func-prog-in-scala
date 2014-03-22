@@ -54,17 +54,13 @@ val ones: Stream[Int] = Stream.cons(1, ones)
 
 
 
-
-
 ones.take(4).toList
 
 ones.existsFoldRight(_ % 2 != 0)
 
 ones.map(_ + 1).filter(_ % 2 == 0).take(2).toList
 
-val twos = constant(2)
-
-
+val twos = Stream.constant(2)
 
 
 
@@ -72,9 +68,7 @@ twos.take(2).toList
 
 twos.map(_ % 2 == 0).take(3).toList
 
-val from2 = from(2)
-
-
+val from2 = Stream.from(2)
 
 
 
@@ -94,12 +88,9 @@ testStream.zip(Stream('a', 'b', 'c', 'd')).take(2).toList
 
 val testStream2 = Stream('b', 'f')
 
-
 testStream.zipAll(testStream2).take(6).toList
 
-
 startsWith(testStream, testStream2)
-
 startsWith(testStream, Stream(1, 2, 3, 4, 5))
 
 testStream.tails.take(2).toList.map(_.take(2).toList)

@@ -4,7 +4,7 @@
 
 import scala.chap3.Chapter._
 import scala.chap3.Chapter.List._
-import scala.chap3.Chapter.Tree._
+
 //Ex 1
 val x = List(1,2,3,4,5) match {
   case Cons(y, Cons(2, Cons(4, _))) => y

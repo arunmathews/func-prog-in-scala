@@ -3,6 +3,9 @@
  */
 
 import scala.chap4.Chapter._
+import scala.chap4.Chapter.Either
+import scala.chap4.Chapter.Partial
+
 val someOp:Option[Int] = Some(5)
 val noneOp:Option[Int] = None
 someOp map(a => a*2)
