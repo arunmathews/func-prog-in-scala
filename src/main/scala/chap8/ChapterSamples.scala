@@ -49,7 +49,7 @@ object ChapterSamples {
 
     def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
-    //Nice - sequence uses map2 which will thread the state through
+    //Nice - State.sequence uses map2 which will thread the state through
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
     //Play around with combinators
@@ -66,7 +66,7 @@ object ChapterSamples {
       case None => throw new RuntimeException("Invalid option")
     })
 
-    //Nice way of ASCII creating string
+    //Nice way of creating ASCII string
     def stringN(n: Int): Gen[String] = listOfN(n, choose(0, 127)).map(_.map(_.toChar).mkString)
 
     //Ex 6
