@@ -24,9 +24,19 @@ object ChapterSamples {
     def listOfN(n: Int): Gen[List[A]] = Gen.listOfN(n, this)
 
     def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(n => this.listOfN(n))
+
+    //Ex 10
+    def unsized: SGen[A] = SGen(_ => this)
   }
 
-  case class SGen[+A](forSize: Int => Gen[A])
+  case class SGen[+A](forSize: Int => Gen[A]) {
+    //Ex 11
+    def apply(n: Int): Gen[A] = forSize(n)
+
+    def map[B](f: A => B): SGen[B] = SGen(x => forSize(x).map(f))
+
+    def flatMap[B](f: A => Gen[B]): SGen[B] = SGen(x => forSize(x).flatMap(f))
+  }
 
   object Gen {
     //Ex 4 My solution
@@ -49,8 +59,11 @@ object ChapterSamples {
 
     def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
-    //Nice - State.sequence uses map2 which will thread the state through
+    //Nice - State.sequence uses map2 which will thread the state through. g.sample is a function
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
+
+    //EX 12
+    def listOf[A](g: Gen[A]): SGen[List[A]] = SGen(n => listOfN(n, g))
 
     //Play around with combinators
     def genTupleInt(start: Int, stopExclusive: Int): Gen[(Int, Int)] = for {
@@ -58,11 +71,12 @@ object ChapterSamples {
       b <- choose(start, stopExclusive)
     } yield (a, b)
 
-    def genOption[A](gen: Gen[A]): Gen[Option[A]] = gen.map(Option(_))
+    def genOption[A](gen: Gen[A]): Gen[Option[A]] =
+      boolean.flatMap(b => if (b) gen.map(Option(_)) else unit(None: Option[A]))
 
     def genAFromOption[A](gen: Gen[Option[A]]): Gen[A] = gen.map({
       case Some(a) => a
-      //Is this the right thing to do ?
+      //Is this the right thing to do ? Probably not.
       case None => throw new RuntimeException("Invalid option")
     })
 
@@ -102,6 +116,11 @@ object ChapterSamples {
     type SuccessCount = Int
     type TestCases = Int
     type Result = Option[(FailedCase, SuccessCount)]
+    type MaxSize = Int
+
+    def apply(f: (TestCases, RNG) => Result): Prop = Prop {
+      (_, n, rng) => f(n, rng)
+    }
 
     def randomStream[A](g: Gen[A])(rng: RNG): Stream[A] = Stream.unfold(rng)(rng => Some(g.sample.run(rng)))
 
@@ -111,36 +130,48 @@ object ChapterSamples {
       s"stack trace: \n ${e.getStackTrace}"
 
     def forAll[A](genA: Gen[A])(f: A => Boolean): Prop = Prop {
-      (n, rng) => randomStream(genA)(rng).zip(Stream.from(0)).take(n).foldRight(None: Result) {
-        case ((a, i), r) => try {
-          if (f(a)) r else Some(a.toString, i)
-        }
-        catch {
-          case e: Exception => Some(createMessage(a, e), i)
-        }
+      (n, rng) =>
+        randomStream(genA)(rng).zip(Stream.from(0)).take(n).foldRight(None: Result) {
+          case ((a, i), r) => try {
+            if (f(a)) r else Some(a.toString, i)
+          }
+          catch {
+            case e: Exception => Some(createMessage(a, e), i)
+          }
       }
+    }
+
+    def forAll[A](g: Int => Gen[A])(f: A => Boolean): Prop = Prop {
+      (max, n, rng) =>
+        val casesPerSize = (n + (max - 1))/max
+        val props: Stream[Prop] = Stream.from(0).take((n min max) + 1).map(i => forAll(g(i))(f))
+        val prop: Prop = props.map(p => Prop {
+          (max, _, rng) => p.run(max, casesPerSize, rng)
+        }).toList.reduce(_ && _)
+
+        prop.run(max, n, rng)
     }
   }
 
-  case class Prop(run: (TestCases, RNG) => Result) {
+  case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
     //Ex 3
     //def check: Boolean
     //def &&(p: Prop): Prop = new Prop { def check: Boolean = Prop.this.check || p.check
 
     //Ex 9
     def &&(p: Prop): Prop = Prop {
-      (n, rng) => run(n, rng) orElse p.run(n, rng)
+      (max, n, rng) => run(max, n, rng) orElse p.run(max, n, rng)
     }
 
     //Nice way of doing this
     def ||(p: Prop): Prop = Prop {
-      (n, rng) => run(n, rng).flatMap {
-        case (msg, _) => p.tag(msg).run(n, rng)
+      (max, n, rng) => run(max, n, rng).flatMap {
+        case (msg, _) => p.tag(msg).run(max, n, rng)
       }
     }
 
     def tag(msg: String) = Prop {
-      (n, rng) => run(n, rng) map {
+      (max, n, rng) => run(max, n, rng) map {
         case (e, c) => (msg + "\n" + e, c)
       }
     }
