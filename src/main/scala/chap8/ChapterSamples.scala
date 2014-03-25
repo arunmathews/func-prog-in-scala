@@ -5,6 +5,7 @@ import scala.chap6.StatePattern.State
 import scala.chap6.SamplesExercises.RNG
 import scala.chap5.ChapterSamples.Stream
 import scala.Some
+import scala.language.implicitConversions
 
 /**
  * Samples and exercises from chapter 8 - Property based testing
@@ -64,6 +65,11 @@ object ChapterSamples {
 
     //EX 12
     def listOf[A](g: Gen[A]): SGen[List[A]] = SGen(n => listOfN(n, g))
+
+    //Ex 14
+    def listOf1[A](g: Gen[A]): SGen[List[A]] = SGen(n => listOfN(n max 1, g))
+
+    implicit def unsized[A](g: Gen[A]): SGen[A] = g.unsized
 
     //Play around with combinators
     def genTupleInt(start: Int, stopExclusive: Int): Gen[(Int, Int)] = for {
@@ -141,6 +147,8 @@ object ChapterSamples {
       }
     }
 
+    def forAll[A](g: SGen[A])(f: A => Boolean): Prop = forAll(g(_))(f)
+
     def forAll[A](g: Int => Gen[A])(f: A => Boolean): Prop = Prop {
       (max, n, rng) =>
         val casesPerSize = (n + (max - 1))/max
@@ -150,6 +158,13 @@ object ChapterSamples {
         }).toList.reduce(_ && _)
 
         prop.run(max, n, rng)
+    }
+
+    def run(p: Prop, maxSize: Int = 100, testCases: Int = 100, rng: RNG = RNG.simple()) {
+      p.run(maxSize, testCases, rng) match {
+        case Some((msg, n)) => println(s" Failed after $n passed tests:\n $msg")
+        case None => println(s"All tests passed. Count: $testCases")
+      }
     }
   }
 
@@ -163,7 +178,7 @@ object ChapterSamples {
       (max, n, rng) => run(max, n, rng) orElse p.run(max, n, rng)
     }
 
-    //Nice way of doing this
+    //|| means either could succeed for the prop to succeed. None is success
     def ||(p: Prop): Prop = Prop {
       (max, n, rng) => run(max, n, rng).flatMap {
         case (msg, _) => p.tag(msg).run(max, n, rng)
