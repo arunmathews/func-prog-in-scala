@@ -106,6 +106,8 @@ object SampleExercises {
 
     def lazyUnit[A](a: => A): Par[A] = fork(unit(a))
 
+    def equal[A](p: Par[A], p2: Par[A]): Par[Boolean] = p.map2(p2)(_ == _)
+
     //Ex 4
     def asyncF[A, B](f: A => B): A => Par[B] = a => lazyUnit(f(a))
 

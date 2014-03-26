@@ -160,6 +160,11 @@ object ChapterSamples {
         prop.run(max, n, rng)
     }
 
+    def check(p: => Boolean): Prop = {
+      lazy val result = p
+      forAll(Gen.unit(())) { _ => result}
+    }
+
     def run(p: Prop, maxSize: Int = 100, testCases: Int = 100, rng: RNG = RNG.simple()) {
       p.run(maxSize, testCases, rng) match {
         case Some((msg, n)) => println(s" Failed after $n passed tests:\n $msg")
