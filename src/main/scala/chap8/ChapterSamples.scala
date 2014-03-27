@@ -4,8 +4,9 @@ import scala.chap8.ChapterSamples.Prop._
 import scala.chap6.StatePattern.State
 import scala.chap6.SamplesExercises.RNG
 import scala.chap5.ChapterSamples.Stream
-import scala.Some
 import scala.language.implicitConversions
+import java.util.concurrent.Executors
+import scala.chap7.SampleExercises.Par
 
 /**
  * Samples and exercises from chapter 8 - Property based testing
@@ -25,6 +26,8 @@ object ChapterSamples {
     def listOfN(n: Int): Gen[List[A]] = Gen.listOfN(n, this)
 
     def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap(n => this.listOfN(n))
+
+    def **[B](gen: Gen[B]): Gen[(A, B)] = this.map2(gen)((_, _))
 
     //Ex 10
     def unsized: SGen[A] = SGen(_ => this)
@@ -114,6 +117,10 @@ object ChapterSamples {
     }
   }
 
+  object ** {
+    def unapply[A, B](p: (A, B)) = Some(p)
+  }
+
   //def listOf[A](a: Gen[A]): Gen[List[A]] - should size be specified ?
   //def listOfN[A](n: Int, a: Gen[A]): Gen[List[A]]
   //def forAll[A](a: Gen[A])(f: A => Boolean): Prop
@@ -160,10 +167,20 @@ object ChapterSamples {
         prop.run(max, n, rng)
     }
 
+    val execGen = Gen.weighted(Gen.choose(1, 4).map(i => Executors.newFixedThreadPool(i)) -> 0.75,
+      Gen.unit(Executors.newCachedThreadPool) -> 0.25)
+
+    def forAllPar[A](genA: Gen[A])(f: A => Par[Boolean]): Prop =
+      forAll(execGen ** genA) { case s ** a => f(a)(s).get() }
+
+    def forAllPar[A](g: SGen[A])(f: A => Par[Boolean]): Prop = forAll(execGen ** g(_)) { case s ** a => f(a)(s).get() }
+
     def check(p: => Boolean): Prop = {
       lazy val result = p
       forAll(Gen.unit(())) { _ => result}
     }
+
+    def checkPar(p: => Par[Boolean]): Prop = forAllPar(Gen.unit(()))(_ => p)
 
     def run(p: Prop, maxSize: Int = 100, testCases: Int = 100, rng: RNG = RNG.simple()) {
       p.run(maxSize, testCases, rng) match {
@@ -171,6 +188,8 @@ object ChapterSamples {
         case None => println(s"All tests passed. Count: $testCases")
       }
     }
+
+
   }
 
   case class Prop(run: (MaxSize, TestCases, RNG) => Result) {

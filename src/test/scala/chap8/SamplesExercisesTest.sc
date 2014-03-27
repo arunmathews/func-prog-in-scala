@@ -63,13 +63,23 @@ Prop.run(sortedProp)
 
 
 val ES: ExecutorService = Executors.newCachedThreadPool
+
 val parCheck = Prop.check {
   Par.equal(Par.unit(1).map(_ + 1), Par.unit(2)) (ES).get()
 }
 
+val parCheck2 = Prop.checkPar {
+  Par.equal(Par.unit(1).map(_ + 1), Par.unit(2))
+}
+
 Prop.run(parCheck)
+Prop.run(parCheck2)
 
+val pint = Gen.choose(0, 10) map (Par.unit(_))
 
+val p4 = Prop.forAllPar(pint)(n => Par.equal(n.map(y => y), n))
 
+//Ex 16
+val pint2 = Gen.choose(-100, 100).listOfN()
 ES.shutdown()
 
