@@ -30,7 +30,6 @@ Prop.run(forAllRemainderProp, 6, 2)
 
 
 
-
 val createProp = (g: Gen[Int], f: Gen[Int] => SGen[List[Int]]) =>
   Prop.forAll(f(g)) { l =>
     val max = l.max
@@ -60,8 +59,6 @@ val sortedProp = Prop.forAll(Gen.listOf(smallInt)) { l =>
 
 Prop.run(sortedProp)
 
-
-
 val ES: ExecutorService = Executors.newCachedThreadPool
 
 val parCheck = Prop.check {
@@ -71,15 +68,38 @@ val parCheck = Prop.check {
 val parCheck2 = Prop.checkPar {
   Par.equal(Par.unit(1).map(_ + 1), Par.unit(2))
 }
-
 Prop.run(parCheck)
+
 Prop.run(parCheck2)
 
-val pint = Gen.choose(0, 10) map (Par.unit(_))
 
+val pint = Gen.choose(0, 10) map (Par.unit(_))
 val p4 = Prop.forAllPar(pint)(n => Par.equal(n.map(y => y), n))
+Prop.run(p4)
 
 //Ex 16
-val pint2 = Gen.choose(-100, 100).listOfN()
+val pint2 = Gen.choose(-100, 100).listOfN(Gen.choose(0, 20)).map(
+  l => l.foldLeft(Par.unit(0))((p, i) => Par.fork {
+    p.map2(Par.unit(i))(_ + _)
+  }))
+
+val pint2Prop = Prop.forAllPar(pint2)(n => Par.equal(n.map(y => y), n))
+
+//Prop.run(pint2Prop)
+
+//Ex 17
+val pfork = Prop.forAllPar(pint2)(n => Par.equal(Par.fork(n), n))
+
+//Ex 18
+//Length should be <=
+//take while + dropwhile == l
+
+def genStringIntFn(g: Gen[Int]): Gen[String => Int] =
+g map (i => (s => {
+  val hash = s.hashCode
+  val rng = Simple(hash)
+  val
+}))
+
 ES.shutdown()
 

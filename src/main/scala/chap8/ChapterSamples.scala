@@ -42,6 +42,10 @@ object ChapterSamples {
     def flatMap[B](f: A => Gen[B]): SGen[B] = SGen(x => forSize(x).flatMap(f))
   }
 
+  trait Cogen[-A] {
+    def sample[B](a: A, s: State[RNG, B]): State[RNG, B]
+  }
+
   object Gen {
     //Ex 4 My solution
     def chooseExplicit(start: Int, stopExclusive: Int): Gen[Int] = {
@@ -121,6 +125,14 @@ object ChapterSamples {
     def unapply[A, B](p: (A, B)) = Some(p)
   }
 
+  def fn[A,B](in: Cogen[A])(out: Gen[B]): Gen[A => B] = {
+    val test = (sa: State[RNG, A]) => sa.flatMap(a => in.sample(a, out.sample))
+
+    val t2 = (ga: Gen[A]) => ga.map(a => in.sample(a, out.sample).run)
+
+    //out.map(b => ((a: A) => in.sample(a, State.unit(b).run)))
+
+  }
   //def listOf[A](a: Gen[A]): Gen[List[A]] - should size be specified ?
   //def listOfN[A](n: Int, a: Gen[A]): Gen[List[A]]
   //def forAll[A](a: Gen[A])(f: A => Boolean): Prop
@@ -188,8 +200,6 @@ object ChapterSamples {
         case None => println(s"All tests passed. Count: $testCases")
       }
     }
-
-
   }
 
   case class Prop(run: (MaxSize, TestCases, RNG) => Result) {
