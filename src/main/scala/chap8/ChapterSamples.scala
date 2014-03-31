@@ -119,20 +119,24 @@ object ChapterSamples {
 
       Gen(State(RNG.double).flatMap(d => if (d < g1End) g1._1.sample else g2._1.sample))
     }
+
+    def fn[A,B](in: Cogen[A])(out: Gen[B]): Gen[A => B] = {
+      //Gen[A => B]
+      //Gen(State[RNG, A => B])
+      //Gen(State(run: RNG => (A => B, RNG))) what we need
+      //Gen(State(run: RNG => (B, RNG)) what we have
+      //sample: (A, State(RNG => (B, RNG))) => State(RNG => (B, RNG)) we also have
+      //
+      val runAtoB = (rng: RNG) =>  ((a: A) => in.sample(a, out.sample).run(rng)._1, rng.nextInt._2)
+
+      Gen(State(runAtoB))
+    }
   }
 
   object ** {
     def unapply[A, B](p: (A, B)) = Some(p)
   }
 
-  def fn[A,B](in: Cogen[A])(out: Gen[B]): Gen[A => B] = {
-    val test = (sa: State[RNG, A]) => sa.flatMap(a => in.sample(a, out.sample))
-
-    val t2 = (ga: Gen[A]) => ga.map(a => in.sample(a, out.sample).run)
-
-    //out.map(b => ((a: A) => in.sample(a, State.unit(b).run)))
-
-  }
   //def listOf[A](a: Gen[A]): Gen[List[A]] - should size be specified ?
   //def listOfN[A](n: Int, a: Gen[A]): Gen[List[A]]
   //def forAll[A](a: Gen[A])(f: A => Boolean): Prop

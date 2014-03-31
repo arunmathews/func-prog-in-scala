@@ -1,5 +1,6 @@
 import java.util.concurrent.{Executors, ExecutorService}
-import scala.chap6.SamplesExercises.Simple
+import scala.chap6.SamplesExercises.{RNG, Simple}
+import scala.chap6.StatePattern.State
 import scala.chap7.SampleExercises._
 import scala.chap8.ChapterSamples._
 /**
@@ -94,12 +95,18 @@ val pfork = Prop.forAllPar(pint2)(n => Par.equal(Par.fork(n), n))
 //Length should be <=
 //take while + dropwhile == l
 
-def genStringIntFn(g: Gen[Int]): Gen[String => Int] =
-g map (i => (s => {
-  val hash = s.hashCode
-  val rng = Simple(hash)
-  val
-}))
+//Ex 19: My solution for Gen[String => Int] inspired from solution for general case. Is this right ?
+def genStringIntFn(g: Gen[Int]): Gen[String => Int] = {
+  val rngState = (rng: RNG) => ((s: String) => {
+    val hash = s.hashCode
+    val srng = Simple(hash)
+    val (num, _) = g.sample.run(srng)
+
+    num
+  }, rng)
+
+  Gen(State(rngState))
+}
 
 ES.shutdown()
 
