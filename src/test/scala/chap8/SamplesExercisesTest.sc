@@ -108,5 +108,9 @@ def genStringIntFn(g: Gen[Int]): Gen[String => Int] = {
   Gen(State(rngState))
 }
 
+val stringToIntGen = genStringIntFn(genInt)
+
+val (test, finalRng) = stringToIntGen.sample.run(nextRng)
+
 ES.shutdown()
 
