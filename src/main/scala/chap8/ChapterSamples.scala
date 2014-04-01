@@ -126,7 +126,7 @@ object ChapterSamples {
       //Gen(State(run: RNG => (A => B, RNG))) what we need
       //Gen(State(run: RNG => (B, RNG)) what we have
       //sample: (A, State(RNG => (B, RNG))) => State(RNG => (B, RNG)) we also have
-      //
+      // Is this right ?
       val runAtoB = (rng: RNG) =>  ((a: A) => in.sample(a, out.sample).run(rng)._1, rng.nextInt._2)
 
       Gen(State(runAtoB))
