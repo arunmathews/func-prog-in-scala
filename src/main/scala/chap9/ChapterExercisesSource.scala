@@ -65,6 +65,12 @@ object ChapterExercisesSource {
       case _ => map2(p, listOfN(n-1, p))(_ :: _)
     }
 
+    //Ex 5. delayed evaluation of argument p
+    def wrap[A](p: => Parser[A]): Parser[A]
+
+    //Ex6
+    def manyWrap[A](p: Parser[A]): Parser[List[A]] = map2(p, wrap(many(p)))(_ :: _) or succeed(List[A]())
+
     def zeroOrMoreList(c: Char): Parser[Int] = char(c).many.map(_.size)
 
     //Why is this better than the method above ? Bcoz size operation on string is constant time, on list is linear time
