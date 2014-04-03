@@ -3,6 +3,7 @@ package scala.chap9
 import scala.language.implicitConversions
 import scala.chap8.ChapterSamples.{Prop, Gen}
 import scala.language.higherKinds
+import scala.util.matching.Regex
 
 /**
  * Chapter and exercises code for chapter 9
@@ -14,24 +15,48 @@ object ChapterExercisesSource {
   trait Parsers[ParseError, Parser[+_]] { self =>
     def run[A](p: Parser[A])(input: String): Either[ParseError, A]
 
-    //should satisfy run(char(c))(c.toString) == Right(c)
-    implicit def char(c: Char): Parser[Char] = string(c.toString).map(_.charAt(0))
+    //Primitives
+    //should satisfy run(string(s))(s) == Right(s)
+    implicit def string(s: String): Parser[String]
+
+    //Return string up to where parsing with p is successful
+    def slice[A](p: Parser[A]): Parser[String]
 
     def succeed[A](a: A): Parser[A] =
       string("").map(_ => a)
 
-    //should satisfy run(string(s))(s) == Right(s)
-    implicit def string(s: String): Parser[String]
+    def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B]
+
+    implicit def regex(r: Regex): Parser[String]
+
+    //2nd argument is lazy. Try the 2nd parser only if the first does not succeed
+    def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A]
+
+    //Non primitives - defined in terms of primitives and other non primitives
+    //Parse and then apply f
+    //Ex 8
+    def map[A, B](pa: Parser[A])(f: A => B): Parser[B] =
+      flatMap(pa)(a => succeed(f(a)))
+
+    //Ex 1, Ex 7
+    //Why is 2nd argument lazy ? Use the 2nd parser only if the 1st parser does not error
+    def map2[A, B, C](pa: Parser[A], pb: => Parser[B])(f: (A, B) => C): Parser[C] =
+      flatMap(pa)(a => map(pb)(b => f(a, b)))
+
+    //Ex 7
+    //2nd argument is lazy. Try the 2nd parser only if the first parser succeeds
+    def product[A, B](pa: Parser[A], pb: => Parser[B]): Parser[(A, B)] =
+      flatMap(pa)(a => map(pb)(b => (a, b)))
+
+    //should satisfy run(char(c))(c.toString) == Right(c)
+    implicit def char(c: Char): Parser[Char] = string(c.toString).map(_.charAt(0))
 
     implicit def operators[A](p: Parser[A]) = ParserOps[A](p)
 
     implicit def asStringParser[A](a: A)(implicit f: A => Parser[String]): ParserOps[String] = ParserOps(f(a))
 
-    def slice[A](p: Parser[A]): Parser[String]
-
-    def or[A](p1: Parser[A], p2: Parser[A]): Parser[A]
-
     //Ex 3
+    //For this to terminate map2 should evaluate 2nd argument lazily
     def many[A](p: Parser[A]): Parser[List[A]] = map2(p, many(p))(_ :: _) or succeed(List[A]())
 
     //Ex 4
@@ -52,16 +77,17 @@ object ChapterExercisesSource {
 
     def zeroC1OneC2(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1) ** oneOrMore(c2)
 
-    def map[A, B](pa: Parser[A])(f: A => B): Parser[B]
-
-    def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B]
-
-    //Ex 1
-    def map2[A, B, C](pa: Parser[A], pb: Parser[B])(f: (A, B) => C): Parser[C] =
-      map(product(pa, pb))(f.tupled)
-
-    def product[A, B](pa: Parser[A], pb: Parser[B]): Parser[(A, B)]
+    //Ex 6
+    def digitAndNC(c: Char): Parser[List[Char]] =
+      regex("[0-9]+".r).flatMap(s => listOfN(s.toInt, char(c)))
     //def zeroCount(c: Char): Parser[Int] =
+
+    //Ex 6 from solutions.
+    def countChar(c: Char): Parser[Int] = for {
+        intString <- "[0-9]+".r
+        n = intString.toInt
+        _ <- listOfN(n, c)
+      } yield n
 
     case class ParserOps[A](p: Parser[A]) {
       def |[B >:A](p2: Parser[B]): Parser[B] = self.or(p, p2)
