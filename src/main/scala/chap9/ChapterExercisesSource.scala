@@ -31,19 +31,26 @@ object ChapterExercisesSource {
 
     def or[A](p1: Parser[A], p2: Parser[A]): Parser[A]
 
-    def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]]
+    //Ex 3
+    def many[A](p: Parser[A]): Parser[List[A]] = map2(p, many(p))(_ :: _) or succeed(List[A]())
 
-    def many[A](p: Parser[A]): Parser[List[A]]
+    //Ex 4
+    def listOfN[A](n: Int, p: Parser[A]): Parser[List[A]] = n match {
+      case c if c == 0 => succeed(List[A]())
+      case _ => map2(p, listOfN(n-1, p))(_ :: _)
+    }
 
     def zeroOrMoreList(c: Char): Parser[Int] = char(c).many.map(_.size)
 
-    //Why is this better than the method above ? Size operation on string is constant time, on list is linear time
+    //Why is this better than the method above ? Bcoz size operation on string is constant time, on list is linear time
     def zeroOrMore(c: Char): Parser[Int] = char(c).many.slice.map(_.size)
 
     //Ex 1
     def oneOrMore(c: Char): Parser[Int] = char(c).map2(char(c).many.slice)(_ +: _).map(_.size)
 
-    def zeroAOneB(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1).map2(oneOrMore(c2))((_, _))
+    def zeroC1OneC2Old(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1).map2(oneOrMore(c2))((_, _))
+
+    def zeroC1OneC2(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1) ** oneOrMore(c2)
 
     def map[A, B](pa: Parser[A])(f: A => B): Parser[B]
 
@@ -77,6 +84,14 @@ object ChapterExercisesSource {
 
       def unitLaw[A](a: A)(in: Gen[String]): Prop =
         Prop.forAll(in)(s => run(succeed(a))(s) == Right(a))
+
+      //Ex 2
+      def productLaw[A, B, C](pa: Parser[A], pb: Parser[B], pc: Parser[C])(in: Gen[String]): Prop =
+        equal(((pa ** pb) ** pc).map({case ((a, b), c) => (a, b, c)}), (pa ** (pb ** pc)).map({case (a, (b, c)) => (a, b, c)}))(in)
+
+      //Map of product = product of map.
+      def productMap[A, B, C, D](pa: Parser[A], pb: Parser[B])(f: A => C)(g: B => D)(in: Gen[String]): Prop =
+        equal((pa ** pb).map({case (a, b) => (f(a), g(b))}), pa.map(f) ** pb.map(g))(in)
     }
   }
 }
