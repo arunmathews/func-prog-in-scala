@@ -83,12 +83,27 @@ object ChapterExercisesSource {
 
     def zeroC1OneC2(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1) ** oneOrMore(c2)
 
-    //Ex 6
-    def digitAndNC(c: Char): Parser[List[Char]] =
-      regex("[0-9]+".r).flatMap(s => listOfN(s.toInt, char(c)))
-    //def zeroCount(c: Char): Parser[Int] =
+    def skipL[B](p: Parser[Any], pb: => Parser[B]): Parser[B] =
+      map2(slice(p), pb)((_, b) => b)
 
-    //Ex 6 from solutions.
+    def skipR[A](pa: Parser[A], p: => Parser[Any]): Parser[A] =
+      map2(pa, slice(p))((a, _) => a)
+
+    def opt[A](p: Parser[A]): Parser[Option[A]] =
+      p.map(Some(_)) or succeed(None)
+
+    //Zero or more whitespace characters
+    def whiteSpace: Parser[String] = "\\s*".r
+
+    def digits: Parser[String] = "\\d+".r
+
+    
+    //Ex 6
+    def digitAndNumberChars(c: Char): Parser[List[Char]] =
+      //Implicit conversion to regex parser
+      digits.flatMap(s => listOfN(s.toInt, char(c)))
+
+    //Ex 6 from solutions. This is better because we are getting the count of of the repeated character
     def countChar(c: Char): Parser[Int] = for {
         intString <- "[0-9]+".r
         n = intString.toInt
