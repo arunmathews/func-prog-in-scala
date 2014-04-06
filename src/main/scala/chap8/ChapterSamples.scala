@@ -40,6 +40,8 @@ object ChapterSamples {
     def map[B](f: A => B): SGen[B] = SGen(x => forSize(x).map(f))
 
     def flatMap[B](f: A => Gen[B]): SGen[B] = SGen(x => forSize(x).flatMap(f))
+
+    def **[B](sb: SGen[B]): SGen[(A, B)] = SGen(n => apply(n) ** sb(n))
   }
 
   trait Cogen[-A] {
@@ -95,6 +97,8 @@ object ChapterSamples {
 
     //Nice way of creating ASCII string
     def stringN(n: Int): Gen[String] = listOfN(n, choose(0, 127)).map(_.map(_.toChar).mkString)
+
+    val string: SGen[String] = SGen(stringN)
 
     //Ex 6
     def even(start: Int, stopExclusive: Int): Gen[Int] =

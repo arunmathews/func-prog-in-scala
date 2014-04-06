@@ -1,7 +1,7 @@
 package scala.chap9
 
 import scala.language.implicitConversions
-import scala.chap8.ChapterSamples.{Prop, Gen}
+import scala.chap8.ChapterSamples.{SGen, Prop, Gen}
 import scala.language.higherKinds
 import scala.util.matching.Regex
 import java.util.regex.Pattern
@@ -13,7 +13,7 @@ object ChapterExercisesSource {
   trait Parser[+A]
   trait ParseError
 
-  trait Parsers[ParseError, Parser[+_]] { self =>
+  trait Parsers[Parser[+_]] { self =>
     def run[A](p: Parser[A])(input: String): Either[ParseError, A]
 
     //Primitives
@@ -33,10 +33,17 @@ object ChapterExercisesSource {
     //2nd argument is lazy. Try the 2nd parser only if the first does not succeed
     def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A]
 
+    //Delays committing during parsing. If p fails midway through parsing undo the commit
     def attempt[A](p: Parser[A]): Parser[A]
 
+    //Ex 11
+    //def furthest[A](p: Parser[A]): Parser[A]
+    //def latest[A](p: Parser[A]): Parser[A]
+    
+    //'msg' will be added to errors if parser wrapped with scope is run and it fails
     def scope[A](msg: String)(p: Parser[A]): Parser[A]
 
+    //If parsing fails ParseError should have the 'msg'
     def label[A](msg: String)(p: Parser[A]): Parser[A]
 
     //Non primitives - defined in terms of primitives and other non primitives
@@ -139,6 +146,10 @@ object ChapterExercisesSource {
     def root[A](p: Parser[A]): Parser[A] =
       p <* eof
 
+    def errorLocation(e: ParseError): Location
+
+    def errorMessage(e: ParseError): String
+
     //Ex 6
     def digitAndNumberChars(c: Char): Parser[List[Char]] =
       digits.flatMap(s => listOfN(s.toInt, char(c)))
@@ -186,6 +197,21 @@ object ChapterExercisesSource {
       //Map of product = product of map.
       def productMapLaw[A, B, C, D](pa: Parser[A], pb: Parser[B])(f: A => C)(g: B => D)(in: Gen[String]): Prop =
         equal((pa ** pb).map({case (a, b) => (f(a), g(b))}), pa.map(f) ** pb.map(g))(in)
+
+      def labelLaw[A](p: Parser[A], inputs: SGen[String]): Prop =
+        Prop.forAll(inputs ** Gen.string) { case (input, msg) =>
+          run(label(msg)(p))(input) match {
+            case Left(e) => errorMessage(e) == msg
+            case _ => true
+          }
+        }
     }
+
+    case class Location(input: String, offset: Int = 0) {
+      lazy val line = input.slice(0, offset+1).count(_ == '\n') + 1
+      lazy val col = input.slice(0, offset+1).reverse.indexOf('\n')
+    }
+
+    case class ParserError(stack: List[(Location, String)])
   }
 }
