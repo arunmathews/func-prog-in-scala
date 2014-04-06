@@ -32,6 +32,10 @@ object ChapterExercisesSource {
     //2nd argument is lazy. Try the 2nd parser only if the first does not succeed
     def or[A](p1: Parser[A], p2: => Parser[A]): Parser[A]
 
+    def attempt[A](p: Parser[A]): Parser[A]
+
+    def scope[A](msg: String)(p: Parser[A]): Parser[A]
+
     //Non primitives - defined in terms of primitives and other non primitives
     //Parse and then apply f
     //Ex 8
@@ -79,7 +83,7 @@ object ChapterExercisesSource {
     //Ex 1
     def oneOrMore(c: Char): Parser[Int] = char(c).map2(char(c).many.slice)(_ +: _).map(_.size)
 
-    def zeroC1OneC2Old(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1).map2(oneOrMore(c2))((_, _))
+    def zeroC1AndOneC2(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1).map2(oneOrMore(c2))((_, _))
 
     def zeroC1OneC2(c1: Char, c2: Char): Parser[(Int, Int)] = zeroOrMore(c1) ** oneOrMore(c2)
 
@@ -92,20 +96,32 @@ object ChapterExercisesSource {
     def opt[A](p: Parser[A]): Parser[Option[A]] =
       p.map(Some(_)) or succeed(None)
 
+    def token[A](p: Parser[A]): Parser[A] =
+      attempt(p) <* whiteSpace
+
+    //Implicit conversion to regex parser
     //Zero or more whitespace characters
     def whiteSpace: Parser[String] = "\\s*".r
 
+    //Implicit conversion to regex parser
+    //One or more digits
     def digits: Parser[String] = "\\d+".r
 
+    def surround[A](start: Parser[Any], stop: Parser[Any])(p: => Parser[A]) =
+      start *> p <* stop
+
+    def sep[A](p: Parser[A], p2: Parser[Any]): Parser[List[A]] = sep1(p, p2) or succeed(List[A]())
+
+    def sep1[A](p: Parser[A], p2: Parser[Any]): Parser[List[A]] =
+      map2(p, many(p2 *> p))(_ :: _)
     
     //Ex 6
     def digitAndNumberChars(c: Char): Parser[List[Char]] =
-      //Implicit conversion to regex parser
       digits.flatMap(s => listOfN(s.toInt, char(c)))
 
-    //Ex 6 from solutions. This is better because we are getting the count of of the repeated character
+    //Ex 6 from solutions. This is better because we are getting the count of the repeated character
     def countChar(c: Char): Parser[Int] = for {
-        intString <- "[0-9]+".r
+        intString <- "[0-9]+".r //Implicit conversion to regex parser
         n = intString.toInt
         _ <- listOfN(n, c)
       } yield n
@@ -120,6 +136,11 @@ object ChapterExercisesSource {
       def product[B](p2: Parser[B]) = self.product(p, p2)
       def slice: Parser[String] = self.slice(p)
       def many: Parser[List[A]] = self.many(p)
+      def *>[B](pb: => Parser[B]) = self.skipL(p, pb)
+      def <*(pb: => Parser[Any]) = self.skipR(p, pb)
+      def sep(pb: Parser[Any]) = self.sep(p, pb)
+      def sep1(pb: Parser[Any]) = self.sep1(p, pb)
+      def scope(msg: String): Parser[A] = self.scope(msg)(p)
     }
 
     object Laws {
@@ -132,12 +153,12 @@ object ChapterExercisesSource {
       def unitLaw[A](a: A)(in: Gen[String]): Prop =
         Prop.forAll(in)(s => run(succeed(a))(s) == Right(a))
 
-      //Ex 2
+      //Ex 2. Product associative
       def productLaw[A, B, C](pa: Parser[A], pb: Parser[B], pc: Parser[C])(in: Gen[String]): Prop =
         equal(((pa ** pb) ** pc).map({case ((a, b), c) => (a, b, c)}), (pa ** (pb ** pc)).map({case (a, (b, c)) => (a, b, c)}))(in)
 
       //Map of product = product of map.
-      def productMap[A, B, C, D](pa: Parser[A], pb: Parser[B])(f: A => C)(g: B => D)(in: Gen[String]): Prop =
+      def productMapLaw[A, B, C, D](pa: Parser[A], pb: Parser[B])(f: A => C)(g: B => D)(in: Gen[String]): Prop =
         equal((pa ** pb).map({case (a, b) => (f(a), g(b))}), pa.map(f) ** pb.map(g))(in)
     }
   }
