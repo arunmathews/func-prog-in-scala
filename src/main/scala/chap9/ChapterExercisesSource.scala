@@ -4,6 +4,7 @@ import scala.language.implicitConversions
 import scala.chap8.ChapterSamples.{Prop, Gen}
 import scala.language.higherKinds
 import scala.util.matching.Regex
+import java.util.regex.Pattern
 
 /**
  * Chapter and exercises code for chapter 9
@@ -35,6 +36,8 @@ object ChapterExercisesSource {
     def attempt[A](p: Parser[A]): Parser[A]
 
     def scope[A](msg: String)(p: Parser[A]): Parser[A]
+
+    def label[A](msg: String)(p: Parser[A]): Parser[A]
 
     //Non primitives - defined in terms of primitives and other non primitives
     //Parse and then apply f
@@ -99,6 +102,15 @@ object ChapterExercisesSource {
     def token[A](p: Parser[A]): Parser[A] =
       attempt(p) <* whiteSpace
 
+    def thru(s: String): Parser[String] =
+      (".*?"+Pattern.quote(s)).r
+
+    def quoted: Parser[String] =
+      string("\"") *> thru("\"")
+
+    def escapedQuoted: Parser[String] =
+      token(""""(?:[^\\]|(?:\\.))*"""".r label "string literal")
+
     //Implicit conversion to regex parser
     //Zero or more whitespace characters
     def whiteSpace: Parser[String] = "\\s*".r
@@ -107,6 +119,12 @@ object ChapterExercisesSource {
     //One or more digits
     def digits: Parser[String] = "\\d+".r
 
+    def doubleString: Parser[String] =
+      token("[+-]?([0-9]*\\.)?[0-9]+([eE][-+]?[0-9]+)?".r)
+
+    def double: Parser[Double] =
+      doubleString map (_.toDouble) label "double literal"
+
     def surround[A](start: Parser[Any], stop: Parser[Any])(p: => Parser[A]) =
       start *> p <* stop
 
@@ -114,7 +132,13 @@ object ChapterExercisesSource {
 
     def sep1[A](p: Parser[A], p2: Parser[Any]): Parser[List[A]] =
       map2(p, many(p2 *> p))(_ :: _)
-    
+
+    def eof: Parser[String] =
+      regex("\\z".r).label("unexpected trailing characters")
+
+    def root[A](p: Parser[A]): Parser[A] =
+      p <* eof
+
     //Ex 6
     def digitAndNumberChars(c: Char): Parser[List[Char]] =
       digits.flatMap(s => listOfN(s.toInt, char(c)))
@@ -141,6 +165,8 @@ object ChapterExercisesSource {
       def sep(pb: Parser[Any]) = self.sep(p, pb)
       def sep1(pb: Parser[Any]) = self.sep1(p, pb)
       def scope(msg: String): Parser[A] = self.scope(msg)(p)
+      def label(msg: String): Parser[A] = self.label(msg)(p)
+      def as[B](b: B): Parser[B] = self.map(self.slice(p))(_ => b)
     }
 
     object Laws {

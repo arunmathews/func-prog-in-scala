@@ -24,6 +24,20 @@ object JSON {
     def array = surround("[", "]")(
       value sep "," map(vs => JArray(vs.toIndexedSeq))) scope "array"
 
-    def value: Parser[JSON] = array
+    def keyval = escapedQuoted ** (":" *> value)
+    def obj = surround("{", "}")(
+      keyval sep "," map(kvs => JObject(kvs.toMap))) scope "object"
+
+    def lit = scope("literal") {
+      "null".as(JNull) |
+      double.map(JNumber) |
+      escapedQuoted.map(JString) |
+      "true".as(JBool(get = true)) |
+      "false".as(JBool(get = false))
+    }
+
+    def value: Parser[JSON] = lit | obj | array
+
+    root(obj | array)
   }
 }
