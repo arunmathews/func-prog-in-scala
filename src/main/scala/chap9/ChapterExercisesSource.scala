@@ -11,7 +11,6 @@ import java.util.regex.Pattern
  */
 object ChapterExercisesSource {
   trait Parser[+A]
-  trait ParseError
 
   trait Parsers[Parser[+_]] { self =>
     def run[A](p: Parser[A])(input: String): Either[ParseError, A]
@@ -22,9 +21,6 @@ object ChapterExercisesSource {
 
     //Return string up to where parsing with p is successful
     def slice[A](p: Parser[A]): Parser[String]
-
-    def succeed[A](a: A): Parser[A] =
-      string("").map(_ => a)
 
     def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B]
 
@@ -40,13 +36,16 @@ object ChapterExercisesSource {
     //def furthest[A](p: Parser[A]): Parser[A]
     //def latest[A](p: Parser[A]): Parser[A]
     
-    //'msg' will be added to errors if parser wrapped with scope is run and it fails
+    //'msg' will be added to error stack if parser wrapped with scope is run and it fails
     def scope[A](msg: String)(p: Parser[A]): Parser[A]
 
     //If parsing fails ParseError should have the 'msg'
     def label[A](msg: String)(p: Parser[A]): Parser[A]
 
     //Non primitives - defined in terms of primitives and other non primitives
+    def succeed[A](a: A): Parser[A] =
+      string("").map(_ => a)
+
     //Parse and then apply f
     //Ex 8
     def map[A, B](pa: Parser[A])(f: A => B): Parser[B] =
@@ -206,12 +205,15 @@ object ChapterExercisesSource {
           }
         }
     }
-
-    case class Location(input: String, offset: Int = 0) {
-      lazy val line = input.slice(0, offset+1).count(_ == '\n') + 1
-      lazy val col = input.slice(0, offset+1).reverse.indexOf('\n')
-    }
-
-    case class ParserError(stack: List[(Location, String)])
   }
+
+  case class Location(input: String, offset: Int = 0) {
+    lazy val line = input.slice(0, offset+1).count(_ == '\n') + 1
+    lazy val col = input.slice(0, offset+1).reverse.indexOf('\n')
+
+    def toError(msg: String): ParseError =
+      ParseError(List((this, msg)))
+  }
+
+  case class ParseError(stack: List[(Location, String)])
 }
