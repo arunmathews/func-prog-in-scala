@@ -79,10 +79,10 @@ object ChapterExercisesSource {
     }
 
     //Ex 5. delayed evaluation of argument p
-    def wrap[A](p: => Parser[A]): Parser[A]
+    //def wrap[A](p: => Parser[A]): Parser[A]
 
     //Ex6
-    def manyWrap[A](p: Parser[A]): Parser[List[A]] = map2(p, wrap(many(p)))(_ :: _) or succeed(List[A]())
+    //def manyWrap[A](p: Parser[A]): Parser[List[A]] = map2(p, wrap(many(p)))(_ :: _) or succeed(List[A]())
 
     def zeroOrMoreList(c: Char): Parser[Int] = char(c).many.map(_.size)
 
@@ -145,9 +145,11 @@ object ChapterExercisesSource {
     def root[A](p: Parser[A]): Parser[A] =
       p <* eof
 
-    def errorLocation(e: ParseError): Location
+    def errorLocation(e: ParseError): Option[Location] =
+      e.latestLoc
 
-    def errorMessage(e: ParseError): String
+    def errorMessage(e: ParseError): Option[String] =
+      e.latestLoc.map(_.input)
 
     //Ex 6
     def digitAndNumberChars(c: Char): Parser[List[Char]] =
@@ -213,7 +215,20 @@ object ChapterExercisesSource {
 
     def toError(msg: String): ParseError =
       ParseError(List((this, msg)))
+
+    def advanceBy(n: Int) = copy(offset = offset + n)
+
   }
 
-  case class ParseError(stack: List[(Location, String)])
+  case class ParseError(stack: List[(Location, String)]) {
+    def push(loc: Location, msg: String): ParseError =
+      copy(stack = (loc, msg)::stack)
+
+    def label[A](s: String): ParseError =
+      ParseError(latestLoc.map((_, s)).toList)
+
+    def latestLoc: Option[Location] = latest.map(_._1)
+
+    def latest: Option[(Location, String)] = stack.lastOption
+  }
 }

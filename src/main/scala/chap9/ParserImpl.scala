@@ -10,35 +10,57 @@ import ParserImplTypes._
 object ParserImplTypes {
   type Parser[+A] = Location => Result[A]
 
-  trait Result[+A]
+  trait Result[+A] {
+    def mapError(f: ParseError => ParseError): Result[A] = this match {
+      case Failure(e) => Failure(f(e))
+      case _ => this
+    }
+  }
 
   case class Success[+A](get: A, charsConsumed: Int) extends Result[A]
   case class Failure(get: ParseError) extends Result[Nothing]
+
+  def firstNonMatchingIndex(s: String, s2: String, offset: Int): Int = {
+    val lengthToCheck = s.length - offset min s2.length
+
+    val maybeNoMatch = (0 to lengthToCheck).toStream.flatMap(i =>
+      if (s.charAt(i) != s2.charAt(i)) {
+        Some(i)
+      }
+    else {
+        None
+      }
+    ).headOption
+
+    maybeNoMatch.getOrElse {
+      if (s.length - offset > s2.length) -1
+      else s.length - offset
+    }
+  }
 }
 
 object ParserImpl extends Parsers[Parser]{
 
-  override def string(s: String): Parser[String] =
-    (inputString: Location) =>
-      if (inputString.input.startsWith(s)) {
-        Success(s, s.length)
+  override def string(w: String): Parser[String] = {
+    val msg = "'" + w + "'"
+    s => {
+      val i = firstNonMatchingIndex(s.input, w, s.offset)
+      if (i == -1) {
+        Success(w, w.length)
       }
       else {
-        Failure(Location(inputString.input, inputString.offset).toError("Expected: " + s))
+        Failure(s.advanceBy(i).toError(msg))
       }
-
-  override def errorMessage(e: ParseError): String = ???
-
-  override def errorLocation(e: ParseError): Location = ???
-
-  //Ex 5. delayed evaluation of argument p
-  override def wrap[A](p: => Parser[A]): Parser[A] = ???
+    }
+  }
 
   //If parsing fails ParseError should have the 'msg'
-  override def label[A](msg: String)(p: Parser[A]): Parser[A] = ???
+  override def label[A](msg: String)(p: Parser[A]): Parser[A] =
+    s => p(s).mapError(_.label(msg))
 
   //'msg' will be added to error stack if parser wrapped with scope is run and it fails
-  override def scope[A](msg: String)(p: Parser[A]): Parser[A] = ???
+  override def scope[A](msg: String)(p: Parser[A]): Parser[A] =
+    s => p(s).mapError(_.push(s, msg))
 
   //Delays committing during parsing. If p fails midway through parsing undo the commit
   override def attempt[A](p: Parser[A]): Parser[A] = ???
@@ -55,7 +77,11 @@ object ParserImpl extends Parsers[Parser]{
   }
 
 
-  override def flatMap[A, B](pa: Parser[A])(f: (A) => Parser[B]): Parser[B] = ???
+  override def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B] =
+    s => pa(s) match {
+      case Success(a, n) => f(a)(s.copy(offset = s.offset + n))
+      case f@Failure(_) => f
+    }
 
   //Return string up to where parsing with p is successful
   override def slice[A](p: Parser[A]): Parser[String] = s => p(s) match {
