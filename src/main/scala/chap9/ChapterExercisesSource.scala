@@ -217,7 +217,6 @@ object ChapterExercisesSource {
       ParseError(List((this, msg)))
 
     def advanceBy(n: Int) = copy(offset = offset + n)
-
   }
 
   case class ParseError(stack: List[(Location, String)]) {
