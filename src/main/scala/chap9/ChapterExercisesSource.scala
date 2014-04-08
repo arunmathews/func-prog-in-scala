@@ -44,7 +44,7 @@ object ChapterExercisesSource {
 
     //Non primitives - defined in terms of primitives and other non primitives
     def succeed[A](a: A): Parser[A] =
-      string("").map(_ => a)
+      string("") map(_ => a)
 
     //Parse and then apply f
     //Ex 8
