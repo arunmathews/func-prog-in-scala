@@ -54,7 +54,9 @@ object ChapterExercisesSource {
     //Ex 1, Ex 7
     //Why is 2nd argument lazy ? Use the 2nd parser only if the 1st parser does not error
     def map2[A, B, C](pa: Parser[A], pb: => Parser[B])(f: (A, B) => C): Parser[C] =
-      flatMap(pa)(a => map(pb)(b => f(a, b)))
+      flatMap(pa)(a => map(pb)(b => {
+        f(a, b)
+      }))
 
     //Ex 7
     //2nd argument is lazy. Try the 2nd parser only if the first parser succeeds

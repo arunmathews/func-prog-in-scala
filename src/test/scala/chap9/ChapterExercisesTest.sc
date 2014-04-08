@@ -5,6 +5,7 @@ import scala.chap9.{ParserImpl, JSON}
  * Test code for chapter 9
  */
 
-val jp = JSON.jsonParser(ParserImpl)
+//val jp = JSON.jsonParser(ParserImpl)
 
-jp(Location("""{ "price" : "as" }"""))
+//jp(Location("""{ "price" : "as" }"""))
+

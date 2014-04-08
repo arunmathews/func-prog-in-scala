@@ -94,7 +94,9 @@ object ParserImpl extends Parsers[Parser]{
 
   override def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B] =
     s => pa(s) match {
-      case Success(a, n) => f(a)(s.advanceBy(n)).addCommit(n == 0)
+      case Success(a, n) => {
+        f(a)(s.advanceBy(n)).addCommit(n == 0)
+      }
       case e@Failure(_, _) => e
     }
 
@@ -105,7 +107,7 @@ object ParserImpl extends Parsers[Parser]{
   }
 
   override def run[A](p: Parser[A])(input: String): Either[ParseError, A] = p(Location(input)) match {
-    case Success(a, count) => Right(a)
+    case Success(a, _) => Right(a)
     case Failure(error, _) => Left(error)
   }
 }
