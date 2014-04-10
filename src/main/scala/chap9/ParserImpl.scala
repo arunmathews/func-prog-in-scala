@@ -34,7 +34,7 @@ object ParserImplTypes {
     val lengthToCheck = (s.length - offset) min s2.length
 
     val maybeNoMatch = (0 to lengthToCheck-1).toStream.flatMap(i =>
-      if (s.charAt(i) != s2.charAt(i)) {
+      if (s.charAt(i+offset) != s2.charAt(i)) {
         Some(i)
       }
     else {
@@ -91,12 +91,16 @@ object ParserImpl extends Parsers[Parser]{
     }
   }
 
+  override def succeed[A](a: A): Parser[A] =
+    s => Success(a, 0)
 
   override def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B] =
     s => pa(s) match {
-      case Success(a, n) => {
-        f(a)(s.advanceBy(n)).addCommit(n == 0)
-      }
+      case Success(a, n) =>
+        f(a)(s.advanceBy(n)).addCommit(n == 0) match {
+          case Success(b, n1) => Success(b, n + n1)
+          case e1@Failure(_, _) => e1
+        }
       case e@Failure(_, _) => e
     }
 

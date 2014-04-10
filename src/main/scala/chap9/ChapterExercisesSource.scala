@@ -42,9 +42,11 @@ object ChapterExercisesSource {
     //If parsing fails ParseError should have the 'msg'
     def label[A](msg: String)(p: Parser[A]): Parser[A]
 
+    def succeed[A](a: A): Parser[A]
     //Non primitives - defined in terms of primitives and other non primitives
-    def succeed[A](a: A): Parser[A] =
-      string("") map(_ => a)
+    //TODO Writing succeed in terms of map leads to infinite recursion and stack overflow
+    //def succeed[A](a: A): Parser[A] =
+      //string("") map(_ => a)
 
     //Parse and then apply f
     //Ex 8
