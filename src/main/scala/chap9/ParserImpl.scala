@@ -84,10 +84,13 @@ object ParserImpl extends Parsers[Parser]{
     }
 
   override def regex(r: Regex): Parser[String] = {
-    val msg = "regex" + r
-    s => r.findPrefixOf(s.input) match {
-      case None => Failure(s.toError(msg), isCommitted = false)
-      case Some(m) => Success(m, m.length)
+    val msg = "regex: " + r
+    s => {
+      val splitS = s.input.substring(s.offset)
+      r.findPrefixOf(splitS) match {
+        case None => Failure(s.toError(msg), isCommitted = false)
+        case Some(m) => Success(m, m.length)
+      }
     }
   }
 
@@ -97,7 +100,7 @@ object ParserImpl extends Parsers[Parser]{
   override def flatMap[A, B](pa: Parser[A])(f: A => Parser[B]): Parser[B] =
     s => pa(s) match {
       case Success(a, n) =>
-        f(a)(s.advanceBy(n)).addCommit(n == 0) match {
+        f(a)(s.advanceBy(n)).addCommit(n != 0) match {
           case Success(b, n1) => Success(b, n + n1)
           case e1@Failure(_, _) => e1
         }
