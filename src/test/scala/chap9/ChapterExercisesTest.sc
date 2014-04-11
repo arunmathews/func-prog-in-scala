@@ -44,8 +44,15 @@ val listLp = ParserImpl.listOfN(3, t2)
 listLp(Location("333"))
 val pp = ParserImpl.product(t1, t2)
 pp(Location("123"))
+val colP = ParserImpl.string(":")
+val esp = ParserImpl.quotedComplex
+val valeP = ParserImpl.skipL(colP, esp)
+val cesp = ParserImpl.product(esp, valeP)
+cesp(Location("\"12\":\"34\""))
+val qp = ParserImpl.quoted
+val qep = ParserImpl.product(qp, colP)
+qep(Location("\"12\":"))
 val jp = JSON.jsonParser(ParserImpl)
 jp(Location("""{"a":1.1}"""))
-
 jp(Location("""{"a":"b"}"""))
 

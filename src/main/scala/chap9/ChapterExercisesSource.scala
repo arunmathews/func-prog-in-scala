@@ -113,13 +113,18 @@ object ChapterExercisesSource {
       attempt(p) <* whiteSpace
 
     def thru(s: String): Parser[String] =
-      (".*?"+Pattern.quote(s)).r
+      (".*?"+Pattern.quote(s)).r.map(s => s.dropRight(1))
 
     def quoted: Parser[String] =
       string("\"") *> thru("\"")
 
+    //Does not work. Need to fix
+    def quotedComplex: Parser[String] =
+      """"([^\\]|(\\.))*"""".r//.map(s => s.drop(1).dropRight(1))
+
     def escapedQuoted: Parser[String] =
-      token(""""(?:[^\\]|(?:\\.))*"""".r label "string literal")
+      //token(quotedComplex label "string literal")
+      token(quoted label "string literal")
 
     //Implicit conversion to regex parser
     //Zero or more whitespace characters
