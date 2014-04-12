@@ -238,5 +238,36 @@ object ChapterExercisesSource {
     def latestLoc: Option[Location] = latest.map(_._1)
 
     def latest: Option[(Location, String)] = stack.lastOption
+
+    override def toString =
+      if (stack.isEmpty) {
+        "empty error message"
+      }
+      else {
+        val flat: List[(Int, (Location, String))] =
+          allMsgs(0).groupBy(_._2._1).toList.
+                     sortBy(_._1.offset).
+                     flatMap(_._2)
+
+        val context = flat.map {
+          case (lvl, (loc, msg)) => (" " * lvl) + formatLoc(loc) + " " + msg
+        } mkString "\n"
+
+        val errorPointer = flat.filter(_._1 == 0).last match {
+          case (_, (loc, _)) => loc.line + "\n" + (" " * (loc.col-1)) + "^"
+        }
+
+        context + "\n\n" + errorPointer
+      }
+
+    private def allMsgs(level: Int): List[(Int, (Location, String))] =
+      collapseStack(stack).map((level, _))
+
+    private def collapseStack(s: List[(Location, String)]): List[(Location, String)] =
+      s.groupBy(_._1).
+        mapValues(_.map(_._2).mkString("; ")).
+        toList.sortBy(_._1.offset)
+
+    private def formatLoc(l: Location): String = l.line + "." + l.col
   }
 }
