@@ -1,5 +1,7 @@
 package scala.chap10
 
+import scala.chap8.ChapterSamples.{Gen, Prop}
+
 /**
  * Code from chap10 - both source and exercises
  */
@@ -62,4 +64,19 @@ object ChapterExercises {
 
   def firstOptionMonoid[A]: Monoid[Option[A]] = optionMonoid
   def secondOptionMonoid[A]: Monoid[Option[A]] = dual(firstOptionMonoid)
+
+  def endoMonoid[A]: Monoid[A => A] = new Monoid[A => A] {
+    override def zero: (A) => A = (a:A) => a
+
+    override def op(a1: (A) => A, a2: (A) => A): (A) => A = a1 andThen a2
+  }
+
+  //Ex 4
+  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = Prop.forAll(for {
+    x <- gen
+    y <- gen
+    z <- gen
+  } yield (x, y, z))(p =>
+    m.op(p._1, m.op(p._2, p._3)) == m.op(m.op(p._1, p._2), p._3)) &&
+    Prop.forAll(gen)(a => m.op(a, m.zero) == a && m.op(m.zero, a) == a)
 }
