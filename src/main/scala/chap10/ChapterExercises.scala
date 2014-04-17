@@ -79,4 +79,17 @@ object ChapterExercises {
   } yield (x, y, z))(p =>
     m.op(p._1, m.op(p._2, p._3)) == m.op(m.op(p._1, p._2), p._3)) &&
     Prop.forAll(gen)(a => m.op(a, m.zero) == a && m.op(m.zero, a) == a)
+
+  //Ex 5
+  def trimMonoid: Monoid[String] = new Monoid[String] {
+    override def zero: String = ""
+
+    override def op(a1: String, a2: String): String = a1.trim + " " + a2.trim
+  }
+
+  //Ex 6
+  def concatenate[A](as: List[A], m: Monoid[A]): A = as.foldLeft(m.zero)(m.op)
+
+  //Ex 7
+  def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = as.foldLeft(m.zero)((b, a) => m.op(b, f(a)))
 }
