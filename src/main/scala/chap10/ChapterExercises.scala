@@ -94,10 +94,13 @@ object ChapterExercises {
   def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = as.foldLeft(m.zero)((b, a) => m.op(b, f(a)))
 
   //Ex 8
-  def foldLeftUsingFoldMap[A, B](as: List[A])(z: B)(f: (B, A) => B): B = {
-    val fMap: (A, B) => B = (a: A, b: B) => f(b, a)
-    val em = endoMonoid[B]
+  def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B = {
+    //Reverse the order because we are going from left to right
+    val em = dual(endoMonoid[B])
 
-    foldMap(as, em)(fMap.curried)(z)
+    foldMap(as, em)(a => b=> f(b, a))(z)
   }
+
+  def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B =
+    foldMap(as, endoMonoid[B])(f.curried)(z)
 }
