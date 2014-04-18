@@ -92,4 +92,12 @@ object ChapterExercises {
 
   //Ex 7
   def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = as.foldLeft(m.zero)((b, a) => m.op(b, f(a)))
+
+  //Ex 8
+  def foldLeftUsingFoldMap[A, B](as: List[A])(z: B)(f: (B, A) => B): B = {
+    val fMap: (A, B) => B = (a: A, b: B) => f(b, a)
+    val em = endoMonoid[B]
+
+    foldMap(as, em)(fMap.curried)(z)
+  }
 }
