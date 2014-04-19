@@ -78,6 +78,12 @@ object SampleExercises {
 
     def map[B](f: A => B): Par[B] = map2(Par.unit(()))((a, _) => f(a))
 
+    def flatMap[B](f: A => Par[B]): Par[B] = (es: ExecutorService) => {
+      val a = this.run(es).get()
+
+      f(a).run(es)
+    }
+
     def map3[B, C, D](pb: Par[B], pc: Par[C])(f: (A, B, C) => D): Par[D] = {
       val abFunPar = this.map2(pb)((a, b) => f.curried(a)(b))
 

@@ -1,6 +1,7 @@
 package scala.chap10
 
 import scala.chap8.ChapterSamples.{Gen, Prop}
+import scala.chap7.SampleExercises._
 
 /**
  * Code from chap10 - both source and exercises
@@ -103,4 +104,32 @@ object ChapterExercises {
 
     foldMap(as, em)(a => b=> f(b, a))(z)
   }
+
+  //Ex 9
+  def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    as.size match {
+      case 0 => m.zero
+      case 1 => f(as(0))
+      case n =>
+        val (al, ar) = as.splitAt(n / 2)
+        val fl = foldMapV(al, m)(f)
+        val fr = foldMapV(ar, m)(f)
+
+        m.op(fl, fr)
+    }
+  }
+
+  //Got this right
+  def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
+    override def zero: Par[A] = Par.unit(m.zero)
+
+    override def op(pa1: Par[A], pa2: Par[A]): Par[A] = pa1.map2(pa2)(m.op)
+  }
+
+  //Incomplete - mapping is parallel. Folding is not
+  def parFoldMapIncomplete[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = foldMapV(v, par(m))(Par.asyncF(f))
+
+  //Nicely done - Mapping and folding is done in parallel
+  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
+    Par.parMap(v.toList)(f).flatMap(bs => foldMapV(bs.toIndexedSeq, par(m))(b => Par.lazyUnit(b)))
 }
