@@ -39,4 +39,16 @@ object WC {
       case Part(l, w, r) => w + (if (!l.isEmpty) 1 else 0) + (if (!r.isEmpty) 1 else 0)
     }
   }
+
+  //Ex 12 - foldMapV will do the splitting for you
+  def wordCountflv(s: String): Int = {
+    def wc(c: Char): WC = if (c.isWhitespace) Part("", 0, "") else Stub(c.toString)
+
+    def unstub(s: String): Int = s.length min 1
+
+    foldMapV(s.toIndexedSeq, wcMonoid)(wc) match {
+      case Stub(str) => unstub(str)
+      case Part(l, w, r) => unstub(l) + w + unstub(r)
+    }
+  }
 }

@@ -38,4 +38,8 @@ ordered(IndexedSeq(5, 0, -4))
 
 ordered(IndexedSeq(5, 0, 4, -1))
 
-WC.wordCount("  lorem ipsum dolor    sit amet,    ok ")
+val str = "  lorem ipsum dolor    sit amet,    ok "
+
+WC.wordCount(str)
+
+WC.wordCountflv(str)
