@@ -132,4 +132,33 @@ object ChapterExercises {
   //Nicely done - Mapping and folding is done in parallel
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     Par.parMap(v.toList)(f).flatMap(bs => foldMapV(bs.toIndexedSeq, par(m))(b => Par.lazyUnit(b)))
+
+  //Ex 10. Checks only for increasing sequence
+  def increasing(ints: IndexedSeq[Int]): Boolean = {
+    val mon = new Monoid[(Boolean, Int)] {
+      override def zero: (Boolean, Int) = (true, Int.MinValue)
+
+      override def op(a1: (Boolean, Int), a2: (Boolean, Int)): (Boolean, Int) =
+        (a1._1 && a2._1 && a1._2 < a2._2, a2._2)
+    }
+
+    foldMapV(ints, mon)(x => (true, x))._1
+  }
+
+  //Ex 10 using Option. Need to keep min and max integers. Answers are not fully correct. 
+  def ordered(ints: IndexedSeq[Int]): Boolean = {
+    val mon = new Monoid[Option[(Boolean, Int, Int)]] {
+      override val zero: Option[(Boolean, Int, Int)] = None
+
+      override def op(a1: Option[(Boolean, Int, Int)], a2: Option[(Boolean, Int, Int)]): Option[(Boolean, Int, Int)] =
+        (a1, a2) match {
+          case (Some((b1, min1, max1)), Some((b2, min2, max2))) =>
+            Some((b1 && b2 && (max1 <= min2 || max2 <= min1), min1 min min2, max1 max max2))
+          case (None, x) => x
+          case (x, None) => x
+        }
+    }
+
+    foldMapV(ints, mon)(x => Some((true, x, x))).map(_._1).getOrElse(true)
+  }
 }

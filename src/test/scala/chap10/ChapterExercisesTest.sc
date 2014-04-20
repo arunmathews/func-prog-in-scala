@@ -24,3 +24,15 @@ val strLength = listMonoidLift((x: String) => x.size, intAddition)
 strLength(stringList)
 
 stringList.foldLeft(trimMonoid.zero)(trimMonoid.op)
+
+//Ex 10
+
+val test = IndexedSeq(1, 2, 5)
+
+increasing(test)
+
+ordered(test)
+
+ordered(IndexedSeq(5, 0, -4))
+
+ordered(IndexedSeq(5, 0, 4, -1))
