@@ -1,6 +1,7 @@
 import scala.chap10.ChapterExercises._
 import scala.chap10.ChapterExtra._
 import scala.chap8.ChapterSamples.{Prop, Gen}
+import scala.chap10.WC
 listMonoid.zero
 listMonoid.op(listMonoid.zero, List(1,3,3))
 listMonoid.op(listMonoid.zero, listMonoid.zero)
@@ -36,3 +37,5 @@ ordered(test)
 ordered(IndexedSeq(5, 0, -4))
 
 ordered(IndexedSeq(5, 0, 4, -1))
+
+WC.wordCount("  lorem ipsum dolor    sit amet,    ok ")
