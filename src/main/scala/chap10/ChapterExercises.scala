@@ -171,5 +171,12 @@ object ChapterExercises {
 
   //Ex 18. There is no Either monoid. Zero ? How to combine either
 
+  def mapMergeMonoid[K, V](V: Monoid[V]): Monoid[Map[K,V]] = new Monoid[Map[K, V]] {
+    override def zero: Map[K, V] = Map()
+
+    override def op(a: Map[K, V], b: Map[K, V]): Map[K, V] = a.map {
+      case (k, v) => (k, V.op(v, b.getOrElse(k, V.zero)))
+    }
+  }
 
 }
