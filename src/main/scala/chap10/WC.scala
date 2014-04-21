@@ -3,7 +3,7 @@ package scala.chap10
 import scala.chap10.ChapterExercises._
 
 /**
- * WC monoid
+ * Doing word count in parallel
  */
 sealed trait WC
 

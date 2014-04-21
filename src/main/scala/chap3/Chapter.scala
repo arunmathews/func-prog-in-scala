@@ -206,7 +206,7 @@ object Chapter {
       case Branch(l, r) => Branch(map(l)(f), map(r)(f))
     }
 
-    //def 29
+    //Ex 29
     def fold[A, B](t: Tree[A])(f: A => B)(b: (B, B) => B): B = t match {
       case Leaf(a) => f(a)
       case Branch(l, r) => b(fold(l)(f)(b), fold(r)(f)(b))
