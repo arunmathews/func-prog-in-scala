@@ -161,4 +161,15 @@ object ChapterExercises {
 
     foldMapV(ints, mon)(x => Some((true, x, x))).map(_._1).getOrElse(true)
   }
+
+  //Ex 17
+  def productMonoid[A,B](a: Monoid[A], b: Monoid[B]): Monoid[(A,B)] = new Monoid[(A, B)] {
+    override val zero: (A, B) = (a.zero, b.zero)
+
+    override def op(a1: (A, B), a2: (A, B)): (A, B) = (a.op(a1._1, a2._1), b.op(a1._2, a2._2))
+  }
+
+  //Ex 18. There is no Either monoid. Zero ? How to combine either
+
+
 }
