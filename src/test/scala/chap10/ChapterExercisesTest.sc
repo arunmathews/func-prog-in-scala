@@ -22,7 +22,6 @@ sum(intList)
 val strLength = listMonoidLift((x: String) => x.size, intAddition)
 strLength(stringList)
 stringList.foldLeft(trimMonoid.zero)(trimMonoid.op)
-
 //Ex 10
 val test = IndexedSeq(1, 2, 5)
 increasing(test)
@@ -32,9 +31,15 @@ ordered(IndexedSeq(5, 0, 4, -1))
 val str = "  lorem ipsum dolor    sit amet,    ok "
 WC.wordCount(str)
 WC.wordCountflv(str)
-
 val tree = Branch(Leaf(1), Branch(Leaf(3), Leaf(5)))
-
 TreeFoldable.toList(tree)
-
 TreeFoldable.toListFM(tree)
+
+val M: Monoid[Map[String, Map[String, Int]]] = mapMergeMonoid(mapMergeMonoid(intAddition))
+
+val m1 = Map("o1" -> Map("i1" -> 1, "i2" -> 2))
+val m2 = Map("o1" -> Map("i2" -> 3))
+val m3 = M.op(m1, m2)
+
+bag(Vector("a", "rose", "is", "a", "rose"))
+

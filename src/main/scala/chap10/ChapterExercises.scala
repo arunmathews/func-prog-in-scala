@@ -159,7 +159,7 @@ object ChapterExercises {
         }
     }
 
-    foldMapV(ints, mon)(x => Some((true, x, x))).map(_._1).getOrElse(true)
+    foldMapV(ints, mon)(x => Some((true, x, x))).fold(true)(_._1)
   }
 
   //Ex 17
@@ -176,7 +176,18 @@ object ChapterExercises {
 
     override def op(a: Map[K, V], b: Map[K, V]): Map[K, V] = a.map {
       case (k, v) => (k, V.op(v, b.getOrElse(k, V.zero)))
-    }
+    } ++ b.filter(kv => !a.keySet(kv._1))
   }
 
+  //Ex 19
+  def functionMonoid[A, B](B: Monoid[B]): Monoid[A => B] = new Monoid[A => B] {
+    override def op(a1: (A) => B, a2: (A) => B): (A) => B = (a: A) => B.op(a1(a), a2(a))
+
+    override def zero: (A) => B = (a: A) => B.zero
+  }
+
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = {
+    val M: Monoid[Map[A, Int]] = mapMergeMonoid(intAddition)
+    foldMapV(as, M)((a: A) => Map(a -> 1))
+  }
 }
