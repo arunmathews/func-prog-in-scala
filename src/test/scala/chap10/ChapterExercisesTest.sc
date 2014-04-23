@@ -2,7 +2,7 @@ import scala.chap10.ChapterExercises._
 import scala.chap10.ChapterExtra._
 import scala.chap3.Chapter.{Leaf, Branch}
 import scala.chap8.ChapterSamples.{Prop, Gen}
-import scala.chap10.{TreeFoldable, WC}
+import scala.chap10.{ListFoldable, TreeFoldable, WC}
 listMonoid.zero
 listMonoid.op(listMonoid.zero, List(1,3,3))
 listMonoid.op(listMonoid.zero, listMonoid.zero)
@@ -42,4 +42,9 @@ val m2 = Map("o1" -> Map("i2" -> 3))
 val m3 = M.op(m1, m2)
 
 bag(Vector("a", "rose", "is", "a", "rose"))
+
+val m = productMonoid(intAddition, intAddition)
+
+//Combine addition and length in one go
+val p = ListFoldable.foldMap(intList)(a => (1, a))(m)
 
