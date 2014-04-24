@@ -1,6 +1,6 @@
-package scala.chap10
+package scala.chap10Monoids
 
-import scala.chap10.ChapterExercises.Monoid
+import scala.chap10Monoids.ChapterExercises.Monoid
 
 /**
  * An alternative to Either that satisfies the monoid laws

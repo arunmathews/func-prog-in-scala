@@ -1,6 +1,6 @@
-package scala.chap10
+package scala.chap10Monoids
 
-import scala.chap10.ChapterExercises.Monoid
+import scala.chap10Monoids.ChapterExercises.Monoid
 
 /**
  * Some extra things that I am learning

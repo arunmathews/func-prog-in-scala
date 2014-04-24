@@ -1,6 +1,6 @@
-package scala.chap10
+package scala.chap10Monoids
 
-import scala.chap10.ChapterExercises._
+import scala.chap10Monoids.ChapterExercises._
 import scala.language.higherKinds
 import scala.chap3.Chapter.{Branch, Leaf, Tree}
 

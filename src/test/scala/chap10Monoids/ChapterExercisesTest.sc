@@ -1,8 +1,8 @@
-import scala.chap10.ChapterExercises._
-import scala.chap10.ChapterExtra._
+import scala.chap10Monoids.ChapterExercises._
+import scala.chap10Monoids.ChapterExtra._
 import scala.chap3.Chapter.{Leaf, Branch}
 import scala.chap8.ChapterSamples.{Prop, Gen}
-import scala.chap10.{ListFoldable, TreeFoldable, WC}
+import scala.chap10Monoids.{ListFoldable, TreeFoldable, WC}
 listMonoid.zero
 listMonoid.op(listMonoid.zero, List(1,3,3))
 listMonoid.op(listMonoid.zero, listMonoid.zero)

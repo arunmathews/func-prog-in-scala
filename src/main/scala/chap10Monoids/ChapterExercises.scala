@@ -1,4 +1,4 @@
-package scala.chap10
+package scala.chap10Monoids
 
 import scala.chap8.ChapterSamples.{Gen, Prop}
 import scala.chap7.SampleExercises._

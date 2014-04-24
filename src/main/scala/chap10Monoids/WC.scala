@@ -1,6 +1,6 @@
-package scala.chap10
+package scala.chap10Monoids
 
-import scala.chap10.ChapterExercises._
+import scala.chap10Monoids.ChapterExercises._
 
 /**
  * Doing word count in parallel
