@@ -5,6 +5,8 @@ import scala.chap8.ChapterSamples.Gen
 import scala.chap7.SampleExercises._
 import scala.chap9.ChapterExercisesSource._
 import scala.chap9.ParserImpl
+import scala.chap6.StatePattern.State
+import scala.chap6.StatePattern
 
 /**
  * Source code from chapter and exercises for chapter 10 - Monads and Functors
@@ -70,6 +72,22 @@ object SourceExercises {
       override def flatMap[A, B](ma: List[A])(f: (A) => List[B]): List[B] = ma flatMap f
     }
 
+    //Ex 2
+    class StateMonads[S] {
+      type StateS[A] = State[S, A]
 
+      val monad = new Monad[StateS] {
+        override def unit[A](a: => A): StateS[A] = State.unit(a)
+
+        override def flatMap[A, B](fa: StateS[A])(f: (A) => StateS[B]): StateS[B] = fa.flatMap(f)
+      }
+    }
+
+    //Nice way - Anonymous class inline
+    def stateMonad[S] = new Monad[({type f[x] = State[S, x]})#f] {
+      override def unit[A](a: => A): State[S, A] = State.unit(a)
+
+      override def flatMap[A, B](fa: State[S, A])(f: (A) => State[S, B]): State[S, B] = fa flatMap f
+    }
   }
 }
