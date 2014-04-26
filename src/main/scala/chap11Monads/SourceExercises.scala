@@ -32,6 +32,13 @@ object SourceExercises {
 
     def map2[A, B, C](ma: F[A], mb: F[B])(f: (A, B) => C): F[C] =
       flatMap(ma)(a => map(mb)(b => f(a, b)))
+
+    //Ex 3
+    def sequence[A](lma: List[F[A]]): F[List[A]] = lma.foldRight(unit(List[A]()))((fa, fla) => map2(fa, fla)(_ :: _))
+
+    def traverseMy[A,B](la: List[A])(f: A => F[B]): F[List[B]] = sequence(la.map(f))
+
+    def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = la.foldRight(unit(List[B]()))((a, flb) => map2(f(a), flb)(_ :: _))
   }
 
   object Monad {
