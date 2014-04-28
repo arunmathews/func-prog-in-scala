@@ -42,6 +42,19 @@ object SourceExercises {
 
     //Ex 4
     def replicateM[A](n: Int, ma: F[A]): F[List[A]] = sequence(List.fill(n)(ma))
+
+    //Ex 5
+    //List monad - list of lists
+    //Option monad - All some then some of list. Otherwise None. Combination depending on the monad.
+
+    def product[A,B](ma: F[A], mb: F[B]): F[(A, B)] = map2(ma, mb)((_, _))
+
+    def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] =
+      ms match {
+        case Nil => unit(Nil)
+        case x::xs =>
+          map2(f(x), filterM(xs)(f))((b, la) => if (b) x::la else la)
+      }
   }
 
   object Monad {
