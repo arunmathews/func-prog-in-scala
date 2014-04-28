@@ -8,6 +8,6 @@ opM.replicateM(5, op)
 opM.replicateM(4, op2)
 opM.sequence(List(op, op2, Some(7)))
 val al = List(1, 2, 3, 4)
-opM.filterM(al)((a: Int) => Option(a%2  == 0))
+opM.filterM(al)((a: Int) => if (a < 3) Option(a%2  == 0) else None)
 
 liM.filterM(al)((a: Int) => List(a%2  != 0))

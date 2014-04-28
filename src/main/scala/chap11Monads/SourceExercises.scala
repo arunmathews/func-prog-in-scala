@@ -49,12 +49,22 @@ object SourceExercises {
 
     def product[A,B](ma: F[A], mb: F[B]): F[(A, B)] = map2(ma, mb)((_, _))
 
-    def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] =
+    //Ex 6
+    def filterMMap2[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] =
       ms match {
         case Nil => unit(Nil)
         case x::xs =>
-          map2(f(x), filterM(xs)(f))((b, la) => if (b) x::la else la)
+          map2(f(x), filterMMap2(xs)(f))((b, la) => if (b) x::la else la)
       }
+
+    def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] = ms match {
+      case Nil => unit(Nil)
+      case x::xs =>
+        flatMap(f(x))(b => if (!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
+    }
+
+    //Ex 6 What does this mean - Monad will determine how the filtering function is run. For option this can stop early
+    // on none. For Par filtering is done in parallel. 
   }
 
   object Monad {
