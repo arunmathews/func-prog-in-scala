@@ -39,6 +39,9 @@ object SourceExercises {
     def traverseMy[A,B](la: List[A])(f: A => F[B]): F[List[B]] = sequence(la.map(f))
 
     def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = la.foldRight(unit(List[B]()))((a, flb) => map2(f(a), flb)(_ :: _))
+
+    //Ex 4
+    def replicateM[A](n: Int, ma: F[A]): F[List[A]] = sequence(List.fill(n)(ma))
   }
 
   object Monad {
