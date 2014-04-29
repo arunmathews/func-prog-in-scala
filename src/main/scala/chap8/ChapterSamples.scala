@@ -69,6 +69,8 @@ object ChapterSamples {
 
     def boolean: Gen[Boolean] = Gen(State(RNG.boolean))
 
+    val uniform: Gen[Double] = Gen(State(RNG.double))
+
     //Nice - State.sequence uses map2 which will thread the state through. g.sample is a function
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(State.sequence(List.fill(n)(g.sample)))
 
