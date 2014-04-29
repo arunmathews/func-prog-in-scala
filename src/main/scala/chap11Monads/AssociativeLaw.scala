@@ -32,6 +32,14 @@ object AssociativeLaw {
   //Ex 8
   //To prove x.flatMap(f).flatMap(g) == x.flatMap(a => f(a).flatMap(g)) where x is Option
   //By definition flatMap makes Option(a).f(a => Option[B]) to Option[B]
+  //If x - None
+  //None.flatMap(f).flatMap(g) = None = None.flatMap(a => f(a).flatMap(g))
+  //If x - Some(u)
+  //Let f: u => Option[V], g: v => Option[W]
+  //x.flatMap(f).flatMap(g) = Some(u).flatMap(u => Some(v)).flatMap(g) = Some(v).flatMap(v => Some(w)) = Some(w)
+  //x.flatMap(a => f(a).flatMap(g)) = Some(u).flatMap(a => f(a).flatMap(g)) = Some(u).flatMap(u => f(u).flatMap(g)) =
+  //Some(u).flatMap(u => f(u).flatMap(v => Some(w)) = Some(u).flatMap(u => Some(v).flatMap(v => Some(w)) =
+  //Some(u).flatMap(u => Some(w)) = Some(w)
   val f: String => Gen[Item] = s => Gen.uniform.map(p => Item(s, p))
   val g: Item => Gen[Order] = i => Gen.choose(1, 100).map(q => Order(i, q))
   val m1 = Gen.stringN(3).flatMap(f).flatMap(g)

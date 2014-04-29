@@ -64,7 +64,15 @@ object SourceExercises {
     }
 
     //Ex 6 What does this mean - Monad will determine how the filtering function is run. For option this can stop early
-    // on none. For Par filtering is done in parallel. 
+    // on none. For Par filtering is done in parallel.
+
+    //Ex 9
+    def compose[A,B,C](f: A => F[B], g: B => F[C]): A => F[C] = a => flatMap(f(a))(g)
+
+    //Ex 10
+    def flatMapComp[A, B](ma: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => ma, f)()
+
+
   }
 
   object Monad {
