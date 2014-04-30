@@ -44,4 +44,7 @@ object AssociativeLaw {
   val g: Item => Gen[Order] = i => Gen.choose(1, 100).map(q => Order(i, q))
   val m1 = Gen.stringN(3).flatMap(f).flatMap(g)
   val m2 = Gen.stringN(3).flatMap(a => f(a).flatMap(g))
+
+  //Show that compose(compose(f, g), h) == compose(f, compose(g, h)) same as x.flatMap(f).flatMap(g) == x.flatMap(a => f(a).flatMap(g))
+  //Rewrite compose in terms of flatmap
 }
