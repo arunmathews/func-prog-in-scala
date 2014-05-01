@@ -4,9 +4,7 @@ import scala.language.higherKinds
 import scala.chap8.ChapterSamples.Gen
 import scala.chap7.SampleExercises._
 import scala.chap9.ChapterExercisesSource._
-import scala.chap9.ParserImpl
 import scala.chap6.StatePattern.State
-import scala.chap6.StatePattern
 
 /**
  * Source code from chapter and exercises for chapter 10 - Monads and Functors
