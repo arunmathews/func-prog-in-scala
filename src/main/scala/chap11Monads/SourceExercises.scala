@@ -65,13 +65,18 @@ object SourceExercises {
     // on none. For Par filtering is done in parallel.
 
     //Ex 9
-    def compose[A,B,C](f: A => F[B], g: B => F[C]): A => F[C] = a => flatMap(f(a))(g)
+    def compose[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] = a => flatMap(f(a))(g)
 
     //Ex 10
-    def flatMapComp[A, B](ma: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => ma, f)()
+    def flatMapComp[A, B](ma: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => ma, f)(())
 
     //Ex 13
     def join[A](mma: F[F[A]]): F[A] = flatMap(mma)(fa => fa)
+
+    //Ex 14
+    def flatMapJoin[A, B](ma: F[A])(f: A => F[B]): F[B] = join(map(ma)(f))
+
+    def composeJoin[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] = a => join(map(f(a))(g))
   }
 
   object Monad {
