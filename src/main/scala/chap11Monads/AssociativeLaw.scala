@@ -56,4 +56,13 @@ object AssociativeLaw {
   //Let f(a) = x
   //flatMap(flatMap(x)(g))(h) == flatMap(x)(b => flatMap(g(b))(h))
   //flatMap(flatMap(x)(f))(g) == flatMap(x)(a => flatMap(f(a))(g))
+
+  //Ex 12
+  //compose(f, unit) == f
+  //a => flatMap(f(a))(unit) == f
+  //flatMap(x)(unit) == x
+  //compose(unit, f) == f
+  //a => flatMap(unit)(f) == f
+  //flatMap(unit(x)(f) == f(x) for all x, f
+
 }

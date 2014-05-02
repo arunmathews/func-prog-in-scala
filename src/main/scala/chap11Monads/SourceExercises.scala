@@ -70,7 +70,8 @@ object SourceExercises {
     //Ex 10
     def flatMapComp[A, B](ma: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => ma, f)()
 
-
+    //Ex 13
+    def join[A](mma: F[F[A]]): F[A] = flatMap(mma)(fa => fa)
   }
 
   object Monad {
