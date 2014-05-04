@@ -61,7 +61,7 @@ object SourceExercises {
         flatMap(f(x))(b => if (!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
     }
 
-    //Ex 6 What does this mean - Monad will determine how the filtering function is run. For option this can stop early
+    //Ex 6 What does the above mean - Monad will determine how the filtering function is run. For option this can stop early
     // on none. For Par filtering is done in parallel.
 
     //Ex 9

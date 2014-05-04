@@ -46,12 +46,13 @@ object AssociativeLaw {
   val m2 = Gen.stringN(3).flatMap(a => f(a).flatMap(g))
 
   //Ex 11
-  //Show that compose(compose(f, g), h) == compose(f, compose(g, h)) same as flatMap(flatMap(f)(g))(h) == flatMap(f)(b => flatMap(g(b))(h))
-  //f: A => F[B], g: B => F[C], h: C => F[D]
+  //Show that x.compose(compose(f, g), h) == x.compose(f, compose(g, h)) same as x.flatMap(flatMap(f)(g))(h) == x.flatMap(f)(b => flatMap(g(b))(h))
+  //x: F[A], f: A => F[B], g: B => F[C], h: C => F[D]
   //Rewrite compose in terms of flatMap
   //compose(compose(f, g), h) == compose(f, compose(g, h))
   //a => flatMap(compose(f, g)(a)(h) == a => flatMap(f(a))(compose(g, h))
   //a => flatMap((b => flatMap(f(b))(g))(a))(h) == a => flatMap(f(a))(b => flatMap(g(b))(h))
+  //Now f is a function that takes A as input. So simplify
   //a => flatMap(flatMap(f(a))(g))(h) == a => flatMap(f(a))(b => flatMap(g(b))(h))
   //Let f(a) = x
   //flatMap(flatMap(x)(g))(h) == flatMap(x)(b => flatMap(g(b))(h))
@@ -66,5 +67,8 @@ object AssociativeLaw {
   //flatMap(unit(x)(f) == f(x) for all x, f
 
   //Ex 15
-  //join(map(join(map(f(a))(g)))(h))
+  //x.flatMap(z => z).flatMap(z => z) == x.flatMap(a => a.flatMap(z => z))
+  //join(join(x)) == x.flatMap(join)
+  //join(join(x)) == join(map(x)(join))
+  //join(unit(x)) == x && join(map(x)(unit)) == x
 }
