@@ -46,7 +46,7 @@ object AssociativeLaw {
   val m2 = Gen.stringN(3).flatMap(a => f(a).flatMap(g))
 
   //Ex 11
-  //Show that x.compose(compose(f, g), h) == x.compose(f, compose(g, h)) same as x.flatMap(flatMap(f)(g))(h) == x.flatMap(f)(b => flatMap(g(b))(h))
+  //Show that compose(compose(f, g), h) == compose(f, compose(g, h)) same as flatMap(flatMap(x)(f))(g) == flatMap(x)(a => flatMap(f(a))(g))
   //x: F[A], f: A => F[B], g: B => F[C], h: C => F[D]
   //Rewrite compose in terms of flatMap
   //compose(compose(f, g), h) == compose(f, compose(g, h))
@@ -64,11 +64,21 @@ object AssociativeLaw {
   //flatMap(x)(unit) == x
   //compose(unit, f) == f
   //a => flatMap(unit)(f) == f
-  //flatMap(unit(x)(f) == f(x) for all x, f
+  //flatMap(unit(x))(f) == f(x) for all x, f
 
   //Ex 15
   //x.flatMap(z => z).flatMap(z => z) == x.flatMap(a => a.flatMap(z => z))
   //join(join(x)) == x.flatMap(join)
   //join(join(x)) == join(map(x)(join))
   //join(unit(x)) == x && join(map(x)(unit)) == x
+
+  //Ex 16
+  //Parser - only the order of the parsers matter.
+  //Par - joining outer threads and then inner is the same as joining inner threads and then outer
+
+  //Ex 17
+  //Gen - Take unit(x) [which is x] and then apply f. That is the same as f(x). RI - Applying unit inside generator
+  //is the same as generator itself
+  //List - LI: Wrapping a value in singleton list and then flattening it does nothing. RI: Take every element of list
+  //wrap them in unit(singleton list) and then flatten it - you get back the original list
 }

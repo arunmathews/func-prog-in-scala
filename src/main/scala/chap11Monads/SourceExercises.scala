@@ -34,7 +34,7 @@ object SourceExercises {
     //Ex 3
     def sequence[A](lma: List[F[A]]): F[List[A]] = lma.foldRight(unit(List[A]()))((fa, fla) => map2(fa, fla)(_ :: _))
 
-    def traverseMy[A,B](la: List[A])(f: A => F[B]): F[List[B]] = sequence(la.map(f))
+    def traverseMine[A, B](la: List[A])(f: A => F[B]): F[List[B]] = sequence(la.map(f))
 
     def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = la.foldRight(unit(List[B]()))((a, flb) => map2(f(a), flb)(_ :: _))
 
@@ -61,8 +61,8 @@ object SourceExercises {
         flatMap(f(x))(b => if (!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
     }
 
-    //Ex 6 What does the above mean - Monad will determine how the filtering function is run. For option this can stop early
-    // on none. For Par filtering is done in parallel.
+    //Ex 6 What does the above function mean - Monad will determine how the filtering function is run. For option this
+    // can stop early on none. For Par filtering is done in parallel.
 
     //Ex 9
     def compose[A, B, C](f: A => F[B], g: B => F[C]): A => F[C] = a => flatMap(f(a))(g)
