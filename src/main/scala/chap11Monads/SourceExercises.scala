@@ -117,6 +117,14 @@ object SourceExercises {
       override def flatMap[A, B](ma: List[A])(f: (A) => List[B]): List[B] = ma flatMap f
     }
 
+    type IntState[A] = State[Int, A]
+
+    object IntStateMonad extends Monad[IntState] {
+      override def unit[A](a: => A): IntState[A] = State.unit(a)
+
+      override def flatMap[A, B](fa: IntState[A])(f: (A) => IntState[B]): IntState[B] = fa.flatMap(f)
+    }
+
     //Ex 2
     class StateMonads[S] {
       type StateS[A] = State[S, A]
