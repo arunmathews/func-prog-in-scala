@@ -1,6 +1,7 @@
 import scala.chap11Monads.SourceExercises.Monad._
 import scala.chap6.SamplesExercises.{Simple, RNG}
 import scala.chap6.StatePattern.State
+import scala.chap11Monads._
 val op: Option[Int] = None
 val op2: Option[Int] = Some(5)
 optionMonad.replicateM(5, op)
@@ -9,9 +10,7 @@ optionMonad.sequence(List(op, op2, Some(7)))
 val al = List(1, 2, 3, 4)
 optionMonad.filterM(al)((a: Int) => if (a < 3) Option(a%2  == 0) else None)
 listMonad.filterM(al)((a: Int) => List(a%2  != 0))
-
 val lj = listMonad.join(List(List(1, 2), List(3, 4)))
-
 val l3l: List[List[List[Int]]] =
   List(List(List(1,2), List(3,4)),
     List(List(), List(5)))
@@ -38,11 +37,10 @@ for {
   a <- Id(aString)
   b <- Id(bString)
 } yield a + b
-
 //Ex 19
 type RandState[A] = State[RNG, A]
 type RndStateInt = RandState[Int]
-val rngStateMonad = stateMonad[RNG]
+val rngStateMonad = StateMonad.stateMonad[RNG]
 val rng = Simple(42)
 val intState: RndStateInt = State(RNG.positiveLessThan(12))
 val listStates = rngStateMonad.replicateM(5, intState)
@@ -57,7 +55,6 @@ val sSeq = rngStateMonad.sequence(sl)
 sSeq.run(newRng)
 val mappedRndInt = rngStateMonad.map2(listStates, sSeq)(_ ++ _)
 mappedRndInt.run(rng)
-
 //Ex 20
 val su2 = State.unit(2)
 val su3 = State.unit(1)
@@ -74,3 +71,11 @@ def setGet[S](s: S): State[S, S] = for {
   x <- State.get
 } yield x
 setGet(2).run(1)
+val test = StateMonad.zipTest(List(5, 4))
+test.run(0)
+
+val intStateMonad = StateMonad.stateMonad[Int]
+
+val intStates = intStateMonad.replicateM(5, State.modify((i: Int) => i * 2))
+
+intStates.run(0)
