@@ -28,14 +28,12 @@ val f: A => List[B] = a => List(a.size)
 val g: B => List[C] = b => List(b.toDouble)
 val h: C => List[D] = c => List(c.toString)
 listMonad.flatMap(listMonad.flatMap(listMonad.flatMap(sList)(f))(g))(h)
-
 listMonad.flatMap(listMonad.flatMap(sList)(f))(b => listMonad.flatMap(g(b))(h))
 listMonad.compose(listMonad.compose(f, g), h)("abcd")
 listMonad.compose(f, listMonad.compose(g, h))("abcd")
 val aString = "Hello, "
 val bString = "Monad!"
 Id(aString) flatMap (a => Id(bString) flatMap (b => Id(a + b)))
-
 for {
   a <- Id(aString)
   b <- Id(bString)
@@ -43,25 +41,36 @@ for {
 
 //Ex 19
 type RandState[A] = State[RNG, A]
-
+type RndStateInt = RandState[Int]
 val rngStateMonad = stateMonad[RNG]
 val rng = Simple(42)
-
-type RndIntState = RandState[Int]
-val intState: RndIntState = State(RNG.positiveLessThan(12))
+val intState: RndStateInt = State(RNG.positiveLessThan(12))
 val listStates = rngStateMonad.replicateM(5, intState)
 val (ints, newRng) = listStates.run(rng)
 
 RNG.positiveInt(rng)
-val su1: RandState[Int] = State(RNG.positiveLessThan(10))
-val su2: RandState[Int] = State(RNG.positiveEven)
-val su3: RandState[Int] = State.unit(3)
-val sl = List(su1, su2, su3)
-
+val sri1: RandState[Int] = State(RNG.positiveLessThan(10))
+val sri2: RandState[Int] = State(RNG.positiveEven)
+val su1: RandState[Int] = State.unit(3)
+val sl = List(sri1, sri2, su1)
 val sSeq = rngStateMonad.sequence(sl)
-
 sSeq.run(newRng)
-
 val mappedRndInt = rngStateMonad.map2(listStates, sSeq)(_ ++ _)
-
 mappedRndInt.run(rng)
+
+//Ex 20
+val su2 = State.unit(2)
+val su3 = State.unit(1)
+val s1 = State.get[RndStateInt].flatMap(s => State.set(s))
+val s2 = State.set(intState).flatMap(_ => State.get)
+val s2A = State.unit(intState)
+val s1A: RndStateInt = State.unit(3)
+s1.run(intState)._2.run(rng) == intState.run(rng)
+s1A.run(rng)
+val sm = State.modify[Int](s => s)
+sm.run(2)
+def setGet[S](s: S): State[S, S] = for {
+  _ <- State.set(s)
+  x <- State.get
+} yield x
+setGet(2).run(1)
