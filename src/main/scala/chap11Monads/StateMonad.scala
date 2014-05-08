@@ -33,17 +33,12 @@ object StateMonad {
 
   def zipWithIndex[A](as: List[A]): List[(Int, A)] =
     as.foldLeft(F.unit(List[(Int, A)]()))((acc, a) => for {
-      n <- State.get
       xs <- acc
+      n <- State.get
       _ <- State.set(n+1)
     } yield (n, a) :: xs).run(0)._1.reverse
 
-  def zipTest[A](as: List[A]) =
-    as.foldLeft(State.unit(List[(Int, A)]()))((acc, a) => for {
-      n <- State.get
-      xs <- acc
-      _ <- State.set(n+1)
-    } yield (n, a) :: xs)
-
-
+  def zipWithIndexFlatMap[A](as: List[A]) =
+    as.foldLeft(F.unit(List[(Int, A)]()))(
+      (accState, a) => accState.flatMap(xs => State.get.flatMap(n => State.set(n + 1).map(_ => (n, a) :: xs))))
 }

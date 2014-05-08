@@ -71,11 +71,12 @@ def setGet[S](s: S): State[S, S] = for {
   x <- State.get
 } yield x
 setGet(2).run(1)
-val test = StateMonad.zipTest(List(5, 4))
-test.run(0)
+val test = StateMonad.zipWithIndex(List(5, 4, 3))
+val testAn = StateMonad.zipWithIndexFlatMap(List(5, 4))
+testAn.run(0)
 
 val intStateMonad = StateMonad.stateMonad[Int]
-
 val intStates = intStateMonad.replicateM(5, State.modify((i: Int) => i * 2))
-
 intStates.run(0)
+
+val modState = State.modify((i: Int) => i + 1)
