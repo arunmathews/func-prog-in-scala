@@ -75,11 +75,9 @@ val test = StateMonad.zipWithIndex(List(5, 4, 3))
 val testAn = StateMonad.zipWithIndexFlatMap(List(5, 4))
 testAn.run(0)
 
-val intStateMonad = StateMonad.stateMonad[Int]
-val intStates = intStateMonad.replicateM(5, State.modify((i: Int) => i * 2))
-intStates.run(0)
-
-val modState = State.modify((i: Int) => i + 1)
+val ss1: RandState[RandState[Int]] = State.unit(sri1)
+val sjn1 = rngStateMonad.join(ss1)
+sjn1.run(rng)
 
 //Ex 21
 val intReaderMonad = Reader.readerMonad[Int]
