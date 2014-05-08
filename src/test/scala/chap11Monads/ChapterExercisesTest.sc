@@ -80,3 +80,16 @@ val intStates = intStateMonad.replicateM(5, State.modify((i: Int) => i * 2))
 intStates.run(0)
 
 val modState = State.modify((i: Int) => i + 1)
+
+//Ex 21
+val intReaderMonad = Reader.readerMonad[Int]
+val rUnit = intReaderMonad.unit(3)
+rUnit.run(6)
+val rRand: Reader[String, Int] = Reader(s => s.size)
+val sReaderMonad = Reader.readerMonad[String]
+val rRepl = sReaderMonad.replicateM(5, rRand)
+rRepl.run("we are here")
+type ReaderS[A] = Reader[String, A]
+val rAnRand: ReaderS[ReaderS[Int]] = Reader(s => Reader(s1 => s.size + s1.size))
+val anotherRs = sReaderMonad.join(rAnRand)
+anotherRs.run("okok")
