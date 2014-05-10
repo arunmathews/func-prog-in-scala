@@ -45,7 +45,6 @@ val rng = Simple(42)
 val intState: RndStateInt = State(RNG.positiveLessThan(12))
 val listStates = rngStateMonad.replicateM(5, intState)
 val (ints, newRng) = listStates.run(rng)
-
 RNG.positiveInt(rng)
 val sri1: RandState[Int] = State(RNG.positiveLessThan(10))
 val sri2: RandState[Int] = State(RNG.positiveEven)
@@ -75,7 +74,7 @@ val test = StateMonad.zipWithIndex(List(5, 4, 3))
 val testAn = StateMonad.zipWithIndexFlatMap(List(5, 4))
 testAn.run(0)
 
-val ss1: RandState[RandState[Int]] = State.unit(sri1)
+val ss1: RandState[RandState[Int]] = State(rng => (sri1, rng))
 val sjn1 = rngStateMonad.join(ss1)
 sjn1.run(rng)
 
