@@ -32,7 +32,7 @@ object SourceExercises {
       flatMap(ma)(a => map(mb)(b => f(a, b)))
 
     //Ex 3
-    def sequence[A](lma: List[F[A]]): F[List[A]] = lma.foldRight(unit(List[A]()))((fa, fla) => map2(fa, fla)(_ :: _))
+    def sequence[A](lma: List[F[A]]): F[List[A]] = traverse(lma)(ma => ma)
 
     def traverseMine[A, B](la: List[A])(f: A => F[B]): F[List[B]] = sequence(la.map(f))
 
