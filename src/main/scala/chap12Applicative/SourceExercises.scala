@@ -7,6 +7,6 @@ import scala.chap11Monads.SourceExercises.Functor
  */
 object SourceExercises {
   trait Applicative[F[_]] extends Functor[F] {
-    
+
   }
 }
