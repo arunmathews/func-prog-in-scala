@@ -21,6 +21,7 @@ object SourceExercises {
     override def map[A, B](as: List[A])(f: (A) => B): List[B] = as map f
   }
 
+  //We can make Monad extend Applicative
   trait Monad[F[_]] extends Functor[F] {
     //primitives
     def unit[A](a: => A): F[A]
