@@ -43,12 +43,18 @@ object SourceExercises {
 
   object Applicative {
     val optionApplicative = new Applicative[Option] {
-      override def map2[A, B, C](fa: Option[A], fb: Option[B])(f: (A, B) => C): Option[C] = for {
-        a <- fa
-        b <- fb
-      } yield f(a, b)
+      override def map2[A, B, C](fa: Option[A], fb: Option[B])(f: (A, B) => C): Option[C] = (fa, fb) match {
+        case (Some(a), Some(b)) => Some(f(a, b))
+        case _ => None
+      }
 
       override def unit[A](a: => A): Option[A] = Option(a)
+    }
+
+    val streamApplicative = new Applicative[Stream] {
+      override def map2[A, B, C](fa: Stream[A], fb: Stream[B])(f: (A, B) => C): Stream[C] = fa zip fb map f.tupled
+
+      override def unit[A](a: => A): Stream[A] = Stream.continually(a)
     }
   }
 }
