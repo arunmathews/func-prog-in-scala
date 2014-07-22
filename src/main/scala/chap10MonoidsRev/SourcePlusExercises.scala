@@ -78,4 +78,14 @@ object SourcePlusExercises {
     z <- gen
   } yield (x, y, z))(p => m.op(p._1, m.op(p._2, p._3)) == m.op(m.op(p._1, p._2), p._3)) &&
   Prop.forAll(gen)((a: A) => m.op(a, m.zero) == a && m.op(a, m.zero) == a)
+
+  def concatenate[A](as: List[A], m: Monoid[A]): A = as.foldLeft(m.zero)(m.op)
+
+  //Ex 5
+  def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = as.foldLeft(m.zero)((b, a) => m.op(b, f(a)))
+
+  //Ex 6
+  def foldRightFoldMap[A, B](as: List[A])(z: B)(f: (A, B) => B): B = foldMap(as, dual(endoMonoid[B]))(f.curried)(z)
+  //Ex 6
+  def foldLeftFoldMap[A, B](as: List[A])(z: B)(f: (B, A) => B): B = foldMap(as, endoMonoid[B])(a => b => f(b ,a))(z)
 }
