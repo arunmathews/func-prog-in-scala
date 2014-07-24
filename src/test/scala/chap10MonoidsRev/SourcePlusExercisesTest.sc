@@ -15,3 +15,5 @@ words.foldRight(stringMonoid.zero)(stringMonoid.op)
 foldLeftFoldMap(words)("")(_ + _)
 
 foldRightFoldMap(words)("")(_ + _)
+
+foldMapV(words.toIndexedSeq, stringMonoid)((a: String) => a)

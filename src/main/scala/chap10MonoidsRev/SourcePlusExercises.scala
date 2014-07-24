@@ -88,4 +88,15 @@ object SourcePlusExercises {
   def foldRightFoldMap[A, B](as: List[A])(z: B)(f: (A, B) => B): B = foldMap(as, dual(endoMonoid[B]))(f.curried)(z)
   //Ex 6
   def foldLeftFoldMap[A, B](as: List[A])(z: B)(f: (B, A) => B): B = foldMap(as, endoMonoid[B])(a => b => f(b ,a))(z)
+
+  //Ex 7
+  def foldMapV[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
+    v.length match {
+      case i: Int if i==0 => m.zero
+      case i: Int if i==1 => f(v(0))
+      case _ =>
+        val (left, right) = v.splitAt(v.length/2)
+        m.op(foldMapV(left, m)(f), foldMapV(right, m)(f))
+    }
+  }
 }
