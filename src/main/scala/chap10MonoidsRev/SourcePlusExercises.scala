@@ -1,6 +1,8 @@
 package scala.chap10MonoidsRev
 
 import scala.chap8.ChapterSamples.{Gen, Prop}
+import scala.chap7.SampleExercises._
+
 /**
  * Source code plus exercises from chapter 10 - Monoids. Monoid - category with one object
  */
@@ -99,4 +101,20 @@ object SourcePlusExercises {
         m.op(foldMapV(left, m)(f), foldMapV(right, m)(f))
     }
   }
+
+  //Ex 8
+  def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
+    override def op(para1: Par[A], para2: Par[A]): Par[A] = para1.map2(para2)(m.op)
+
+    override def zero: Par[A] = Par.unit(m.zero)
+  }
+
+  //Incomplete - only reducing in parallel not mapping
+  def parFoldMapIncomplete[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = foldMapV(v, par(m))(Par.asyncF(f))
+
+  //Nice. Map in parallel first and then use par function above to
+  def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
+    Par.parMap(v.toList)(f).flatMap {
+      seqB => foldMapV(seqB.toIndexedSeq, par(m))(b => Par.lazyUnit(b))
+    }
 }
