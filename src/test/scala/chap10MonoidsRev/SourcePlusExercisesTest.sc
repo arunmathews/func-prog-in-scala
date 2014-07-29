@@ -1,4 +1,5 @@
 import scala.chap10MonoidsRev.SourcePlusExercises._
+import scala.chap10Monoids.WC._
 
 listMonoid.zero
 
@@ -21,3 +22,7 @@ foldMapV(words.toIndexedSeq, stringMonoid)((a: String) => a)
 increasing(IndexedSeq(1,4,7,9))
 
 increasing(IndexedSeq(1, 3, 8, 4))
+
+wordCount("we are we are ")
+
+wordCountflv("we are we are ")
