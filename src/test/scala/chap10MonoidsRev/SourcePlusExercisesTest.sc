@@ -17,3 +17,7 @@ foldLeftFoldMap(words)("")(_ + _)
 foldRightFoldMap(words)("")(_ + _)
 
 foldMapV(words.toIndexedSeq, stringMonoid)((a: String) => a)
+
+increasing(IndexedSeq(1,4,7,9))
+
+increasing(IndexedSeq(1, 3, 8, 4))

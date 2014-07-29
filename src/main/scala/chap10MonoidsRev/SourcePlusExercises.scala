@@ -108,13 +108,23 @@ object SourcePlusExercises {
 
     override def zero: Par[A] = Par.unit(m.zero)
   }
-
   //Incomplete - only reducing in parallel not mapping
   def parFoldMapIncomplete[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = foldMapV(v, par(m))(Par.asyncF(f))
-
   //Nice. Map in parallel first and then use par function above to
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     Par.parMap(v.toList)(f).flatMap {
       seqB => foldMapV(seqB.toIndexedSeq, par(m))(b => Par.lazyUnit(b))
     }
+
+  //Ex 9
+  def increasing(ints: IndexedSeq[Int]): Boolean = {
+    val increasingMonoid = new Monoid[(Boolean, Int)] {
+      override def op(a1: (Boolean, Int), a2: (Boolean, Int)): (Boolean, Int) = (a1._1 && a2._1 && a1._2 < a2._2, a2._2)
+
+      override def zero: (Boolean, Int) = (true, Int.MinValue)
+    }
+
+    foldMapV(ints, increasingMonoid)(x => (true, x))._1
+  }
+
 }
