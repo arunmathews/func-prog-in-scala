@@ -110,7 +110,7 @@ object SourcePlusExercises {
   }
   //Incomplete - only reducing in parallel not mapping
   def parFoldMapIncomplete[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = foldMapV(v, par(m))(Par.asyncF(f))
-  //Nice. Map in parallel first and then use par function above to
+  //Nice. Map in parallel first and then use par function above to lift the monoid to a par monoid
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     Par.parMap(v.toList)(f).flatMap {
       seqB => foldMapV(seqB.toIndexedSeq, par(m))(b => Par.lazyUnit(b))
