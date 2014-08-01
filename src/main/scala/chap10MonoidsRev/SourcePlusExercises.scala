@@ -135,4 +135,22 @@ object SourcePlusExercises {
       override def zero: (A, B) = (ma.zero, mb.zero)
     }
   }
+
+  def mapMergeMonoid[K,V](mv: Monoid[V]): Monoid[Map[K, V]] = new Monoid[Map[K, V]] {
+    override def op(a: Map[K, V], b: Map[K, V]): Map[K, V] = a.foldLeft(b) {
+      case (updatedB, (k, v)) => updatedB + (k -> mv.op(v, updatedB.getOrElse(k, mv.zero)))
+    }
+
+    override def zero: Map[K, V] = Map()
+  }
+
+  //Ex 17
+  def functionMonoid[A,B](mb: Monoid[B]): Monoid[A => B] = new Monoid[A => B] {
+    override def op(f1: (A) => B, f2: (A) => B): (A) => B = (a: A) => mb.op(f1(a), f2(a))
+
+    override def zero: (A) => B = (a: A) => mb.zero
+  }
+
+  //Ex 18
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = foldMapV(as, mapMergeMonoid[A, Int](intAddition))(a => Map(a -> 1))
 }
