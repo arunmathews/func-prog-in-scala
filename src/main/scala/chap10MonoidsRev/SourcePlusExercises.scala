@@ -127,4 +127,12 @@ object SourcePlusExercises {
     foldMapV(ints, increasingMonoid)(x => (true, x))._1
   }
 
+  //Ex 16
+  def productMonoid[A,B](ma: Monoid[A], mb: Monoid[B]): Monoid[(A,B)] = {
+    new Monoid[(A, B)] {
+      override def op(ab1: (A, B), ab2: (A, B)): (A, B) = (ma.op(ab1._1, ab2._1), mb.op(ab1._2, ab2._2))
+
+      override def zero: (A, B) = (ma.zero, mb.zero)
+    }
+  }
 }
