@@ -39,7 +39,7 @@ object WC {
     }
   }
 
-  //Ex 11 flatMapV
+  //Ex 11 foldMapV
   def wordCountFMV(s: String): Int = {
     def charToWC(c: Char) = if(c.isWhitespace) Part("", 0, "") else Stub(c.toString)
 

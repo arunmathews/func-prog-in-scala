@@ -1,3 +1,4 @@
+import scala.chap10MonoidsRev.ListFoldable
 import scala.chap10MonoidsRev.SourcePlusExercises._
 import scala.chap10Monoids.WC._
 
@@ -37,3 +38,9 @@ val m2 = Map("o1" -> Map("i2" -> 3), "o2" -> Map("i2" -> 5))
 M.op(m1, m2)
 
 bag(Vector("a", "rose", "is", "a", "rose"))
+
+val mp = productMonoid(intAddition, intAddition)
+
+val p = ListFoldable.foldMap(List(1,2,3,4))(a => (1, a))(mp)
+
+val mean = p._2 / p._1.toDouble
