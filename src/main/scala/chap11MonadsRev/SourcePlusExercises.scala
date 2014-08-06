@@ -31,6 +31,13 @@ class SourcePlusExercises {
     def map[A, B](fa: F[A])(f: A => B): F[B] = flatMap(fa)(a => unit(f(a)))
     def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
       flatMap(fa)(a => map(fb)(b => f(a, b)))
+
+    //Ex 3
+    def sequence[A](lma: List[F[A]]): F[List[A]] = lma.foldRight(unit(List[A]()))((ma, mSeq) => map2(ma, mSeq)(_ ::_))
+
+    //Got this right. Yay
+    def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = la.foldRight(unit(List[B]()))((a, mSeq) => map2(f(a), mSeq)(_ :: _))
+    //End Ex 3
   }
 
   object Monad {
