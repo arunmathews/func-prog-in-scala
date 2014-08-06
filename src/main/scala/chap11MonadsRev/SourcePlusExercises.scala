@@ -1,5 +1,6 @@
 package scala.chap11MonadsRev
 
+import scala.chap6.StatePattern.State
 import scala.chap7.SampleExercises._
 import scala.chap8.ChapterSamples.Gen
 import scala.chap9.ChapterExercisesSource.{Parser, Parsers}
@@ -71,5 +72,24 @@ class SourcePlusExercises {
     }
 
     //End Ex 1
+
+    //Ex 2
+    class StateMonadsS[S] {
+      type StateS[A] = State[S, A]
+
+      val monad = new Monad[StateS] {
+        override def unit[A](a: => A): StateS[A] = State.unit(a)
+
+        override def flatMap[A, B](fa: StateS[A])(f: (A) => StateS[B]): StateS[B] = fa flatMap f
+      }
+    }
+
+    //Nice. Create anonymous class and project out its type member f
+    def stateMonad[S] = new Monad[({type f[x] = State[S, x]})#f] {
+      override def unit[A](a: => A): State[S, A] = State.unit(a)
+
+      override def flatMap[A, B](fa: State[S, A])(f: (A) => State[S, B]): State[S, B] = fa flatMap f
+    }
+    //End Ex 2
   }
 }
