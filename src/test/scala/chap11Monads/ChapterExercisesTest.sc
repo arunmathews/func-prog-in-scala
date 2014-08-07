@@ -2,6 +2,8 @@ import scala.chap11Monads.SourceExercises.Monad._
 import scala.chap6.SamplesExercises.{Simple, RNG}
 import scala.chap6.StatePattern.State
 import scala.chap11Monads._
+
+listMonad.replicateM(5, List(1, 2))
 val op: Option[Int] = None
 val op2: Option[Int] = Some(5)
 optionMonad.replicateM(5, op)

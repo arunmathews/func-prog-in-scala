@@ -3,12 +3,13 @@ package scala.chap11MonadsRev
 import scala.chap6.StatePattern.State
 import scala.chap7.SampleExercises._
 import scala.chap8.ChapterSamples.Gen
-import scala.chap9.ChapterExercisesSource.{Parser, Parsers}
+import scala.chap9.ChapterExercisesSource.Parsers
+import scala.language.higherKinds
 
 /**
  * Revision of chap 11 Monads after a break
  */
-class SourcePlusExercises {
+object SourcePlusExercises {
   trait Functor[F[_]] {
     def map[A, B](fa: F[A])(f: A => B): F[B]
 
@@ -32,12 +33,30 @@ class SourcePlusExercises {
     def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
       flatMap(fa)(a => map(fb)(b => f(a, b)))
 
-    //Ex 3
+    //Ex 3 Got this right. Yay
     def sequence[A](lma: List[F[A]]): F[List[A]] = lma.foldRight(unit(List[A]()))((ma, mSeq) => map2(ma, mSeq)(_ ::_))
 
-    //Got this right. Yay
     def traverse[A,B](la: List[A])(f: A => F[B]): F[List[B]] = la.foldRight(unit(List[B]()))((a, mSeq) => map2(f(a), mSeq)(_ :: _))
     //End Ex 3
+
+    //Ex 4
+    def replicateMMatch[A](n: Int, ma: F[A]): F[List[A]] = n match {
+      case 0 => unit(List[A]())
+      case _ => map2(ma, replicateM(n-1, ma))(_ :: _)
+    }
+
+    def replicateM[A](n: Int, ma: F[A]): F[List[A]] = sequence(List.fill(n)(ma))
+    //End Ex 4
+
+    //Ex 5
+    //ListMonad replicateM -  Create a list of lists where each list is of length n. The elements will be selected from
+    // the input list. So if there are x elements in the input list then the number of lists generated = x ^ n
+
+    //OptionMonad replicatwM - Create an Option based on the input option. None gives None. Some(x) will give
+    //Some(List(x repeated n times)
+
+    //Generally replicateM will create a list of monadic values and then combine them into a single list value where
+    //the combination function depends on the monad. For option None will short circuit the whole operation to None
   }
 
   object Monad {
