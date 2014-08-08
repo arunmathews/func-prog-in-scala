@@ -137,8 +137,9 @@ object SourcePlusExercises {
   }
 
   def mapMergeMonoid[K,V](mv: Monoid[V]): Monoid[Map[K, V]] = new Monoid[Map[K, V]] {
-    override def op(a: Map[K, V], b: Map[K, V]): Map[K, V] = a.foldLeft(b) {
-      case (updatedB, (k, v)) => updatedB + (k -> mv.op(v, updatedB.getOrElse(k, mv.zero)))
+    //Much cleaner solution
+    override def op(a: Map[K, V], b: Map[K, V]): Map[K, V] = (a.keySet ++ b.keySet).foldLeft(zero) {
+      (acc, k) => acc.updated(k, mv.op(a.getOrElse(k, mv.zero), b.getOrElse(k, mv.zero)))
     }
 
     override def zero: Map[K, V] = Map()
