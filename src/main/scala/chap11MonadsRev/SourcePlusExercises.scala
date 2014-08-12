@@ -67,6 +67,7 @@ object SourcePlusExercises {
         case x::xs => flatMap(f(x))(b => if(!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
       }
     }
+    //Ex 6 done
   }
 
   object Monad {
