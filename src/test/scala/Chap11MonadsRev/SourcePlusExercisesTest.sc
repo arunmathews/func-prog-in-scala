@@ -22,4 +22,9 @@ optionMonad.sequence(List(Some(4), Some(5), None))
 optionMonad.replicateM(5, Some('a'))
 
 optionMonad.replicateM(3, None)
+val al  = List(1,2,3,4)
+listMonad.filterM(al)((a: Int) => List(a%2  != 0))
 
+streamMonad.filterM(al)(a => Stream(a%3 != 0))
+
+optionMonad.filterM(al)(a => if (a > 0) Some(true) else None)

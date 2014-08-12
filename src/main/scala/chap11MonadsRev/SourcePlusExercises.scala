@@ -57,6 +57,16 @@ object SourcePlusExercises {
 
     //Generally replicateM will create a list of monadic values and then combine them into a single list value where
     //the combination function depends on the monad. For option None will short circuit the whole operation to None
+
+    def product[A,B](ma: F[A], mb: F[B]): F[(A, B)] = map2(ma, mb)((_, _))
+
+    //Ex 6
+    def filterM[A](ms: List[A])(f: A => F[Boolean]): F[List[A]] = {
+      ms match {
+        case Nil => unit(Nil)
+        case x::xs => flatMap(f(x))(b => if(!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
+      }
+    }
   }
 
   object Monad {
