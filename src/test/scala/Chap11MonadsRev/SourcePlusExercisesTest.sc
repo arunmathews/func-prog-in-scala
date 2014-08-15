@@ -28,3 +28,5 @@ listMonad.filterM(al)((a: Int) => List(a%2  != 0))
 streamMonad.filterM(al)(a => Stream(a%3 != 0))
 
 optionMonad.filterM(al)(a => if (a > 0) Some(true) else None)
+
+optionMonad.filterM(al)(a => if (a %2 == 0) Some(true) else None)

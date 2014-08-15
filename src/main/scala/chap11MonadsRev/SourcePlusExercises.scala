@@ -67,6 +67,7 @@ object SourcePlusExercises {
         case x::xs => flatMap(f(x))(b => if(!b) filterM(xs)(f) else map(filterM(xs)(f))(x :: _))
       }
     }
+    //What does this mean ? FilterM filters a list. How the list is filtered and later combined depends on the monad
     //Ex 6 done
   }
 
