@@ -69,6 +69,16 @@ object SourcePlusExercises {
     }
     //What does this mean ? FilterM filters a list. How the list is filtered and later combined depends on the monad
     //Ex 6 done
+
+    /* Prove monad associative law for Option monad
+       Monad law - x.flatMap(f).flatMap(g) == x.flatMap(a => f(a).flatMap(g))
+       For option None - None.flatMap(f).flatMap(g) = None and None.flatMap(a => f(a).flatMap(g)) = None
+       For option Some(v):
+       x.flatMap(f).flatMap(g) == x.flatMap(a => f(a).flatMap(g))
+       Some(v).flatMap(f).flatMap(g) == Some(v).flatMap(a => f(a).flatMap(g))
+       f(v).flatMap(g)  == (a => f(a).flatMap(g))(v)
+       f(v).flatMap(g) == f(v).flatMap(g) QED
+    */
   }
 
   object Monad {
