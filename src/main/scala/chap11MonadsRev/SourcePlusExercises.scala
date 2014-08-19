@@ -4,7 +4,6 @@ import scala.chap6.StatePattern.State
 import scala.chap7.SampleExercises._
 import scala.chap8.ChapterSamples.Gen
 import scala.chap9.ChapterExercisesSource.Parsers
-import scala.concurrent.Future
 import scala.language.higherKinds
 
 /**
@@ -86,6 +85,15 @@ object SourcePlusExercises {
 
     //Ex 8 - tough one
     def flatMapCompose[A, B](fa: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => fa, f)(())
+
+    //Ex 9 - Associative law for compose is the same as flatMap
+    /*
+      To show flatMap(x)(f).flatMap(g) == flatMap(x)(a => f(a).flatMap(g)) is same as
+      compose(compose(f, g), h) == compose(f, compose(g, h))
+      LHS: flatMap(x)(f).flatMap(g) == compose(x, f).flatMap(g) == flatMap(compose(x, f))(g) == compose(compose(x, f), g)
+      RHS: flatMap(x)(a => f(a).flatMap(g)) == compose(x, a => f(a).flatMap(g)) == compose(x, a => flatMap(f(a))(g)) ==
+      compose(x, a => compose(f(a), g) == compose(x, compose(f, g)) QED
+     */
   }
 
   object Monad {
@@ -124,12 +132,6 @@ object SourcePlusExercises {
       override def unit[A](a: => A): List[A] = List(a)
 
       override def flatMap[A, B](fa: List[A])(f: (A) => List[B]): List[B] = fa flatMap f
-    }
-
-    val futureMonad = new Monad[Future] {
-      override def unit[A](a: => A): Future[A] = Future(a)
-
-      override def flatMap[A, B](fa: Future[A])(f: (A) => Future[B]): Future[B] = fa flatMap f
     }
 
     //End Ex 1
