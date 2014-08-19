@@ -4,6 +4,7 @@ import scala.chap6.StatePattern.State
 import scala.chap7.SampleExercises._
 import scala.chap8.ChapterSamples.Gen
 import scala.chap9.ChapterExercisesSource.Parsers
+import scala.concurrent.Future
 import scala.language.higherKinds
 
 /**
@@ -82,6 +83,9 @@ object SourcePlusExercises {
 
     //Ex 7
     def compose[A,B,C](f: A => F[B], g: B => F[C]): A => F[C] = (a: A) => flatMap(f(a))(g)
+
+    //Ex 8 - tough one
+    def flatMapCompose[A, B](fa: F[A])(f: A => F[B]): F[B] = compose((_: Unit) => fa, f)(())
   }
 
   object Monad {
@@ -120,6 +124,12 @@ object SourcePlusExercises {
       override def unit[A](a: => A): List[A] = List(a)
 
       override def flatMap[A, B](fa: List[A])(f: (A) => List[B]): List[B] = fa flatMap f
+    }
+
+    val futureMonad = new Monad[Future] {
+      override def unit[A](a: => A): Future[A] = Future(a)
+
+      override def flatMap[A, B](fa: Future[A])(f: (A) => Future[B]): Future[B] = fa flatMap f
     }
 
     //End Ex 1
